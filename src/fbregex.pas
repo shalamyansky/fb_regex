@@ -396,6 +396,43 @@ begin
     ResultOk := RoutineContext.WriteOutputString( AStatus, TReplaceFunction.OUTPUT_FIELD_RESULT, Result, ResultNull );
 end;{ TReplaceFunction.execute }
 
+function Replace( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
+var
+    RegEx : TRegEx;
+    Match : TMatch;
+    Start : LONGINT;
+    Head , Tail : UnicodeString;
+begin
+    Result := Text;
+    if( ( Length( Text ) = 0 ) or ( Length( Pattern ) = 0 ) )then begin
+        exit;
+    end;
+    if( Amount < 0 )then begin
+        Amount := $7FFFFFFF;
+    end;
+    if( Skip < 0 )then begin
+        Skip := 0;
+    end;
+    RegEx := TRegEx.Create( Pattern, [ roCompiled ] );
+    if( Skip = 0 )then begin
+        Result := RegEx.Replace( Text, Replacement, Amount );
+    end else begin
+        Match := RegEx.Match( Text );
+        Dec( Skip );
+        while( ( Skip > 0 ) and Match.Success )do begin
+            Match := Match.NextMatch;
+            Dec( Skip );
+        end;
+        if( Match.Success )then begin
+            Start  := Match.Index + Match.Length;
+            Head   := Copy( Text, 1, Start - 1 );
+            Tail   := Copy( Text, Start );
+            Result := Head + RegEx.Replace( Tail, Replacement, Amount );
+        end;
+    end;
+end;{ Replace }
+
+(*
 function SubstitutePercents( Match:TMatch; Replacement:UnicodeString; Percents:TMatchCollection ):UnicodeString;
 var
     I, PercentNo, Idx, PercentLen : LONGINT;
@@ -488,7 +525,7 @@ begin
     end;
     Result := Result;
 end;{ Replace }
-
+*)
 
 { plugin call }
 
