@@ -9,7 +9,8 @@
 library fb_regex;
 
 uses
-  fbregex;
+    fbregex_register
+;
 
 {$R *.res}
 
@@ -18,4 +19,5 @@ exports
 ;
 
 begin
+
 end.

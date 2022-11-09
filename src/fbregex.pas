@@ -11,39 +11,7 @@
 (*
 set term ^;
 
-create or alter package regex
-as begin
-
-procedure matches(
-    "Text"    varchar(8191) character set UTF8
-  , "Pattern" varchar(8191) character set UTF8
-)returns(
-    "Number"  integer
-  , "Groups"  varchar(8191) character set UTF8
-);
-
-procedure groups(
-    "Groups"  varchar(8191) character set UTF8
-)returns(
-    "Number"  integer
-  , "Start"   integer
-  , "Finish"  integer
-);
-
-function replace(
-    "Text"        varchar(8191) character set UTF8
-  , "Pattern"     varchar(8191) character set UTF8
-  , "Replacement" varchar(8191) character set UTF8
-  , "Amount"      integer
-  , "Skip"        integer
-)returns          varchar(8191) character set UTF8;
-
-end^
-
-recreate package body regex
-as begin
-
-procedure matches(
+create or alter procedure matches(
     "Text"    varchar(8191) character set UTF8
   , "Pattern" varchar(8191) character set UTF8
 )returns(
@@ -53,9 +21,9 @@ procedure matches(
     'fb_regex!matches'
 engine
     udr
-;
+^
 
-procedure groups(
+create or alter procedure groups(
     "Groups"  varchar(8191) character set UTF8
 )returns(
     "Number"  integer
@@ -65,9 +33,9 @@ procedure groups(
     'fb_regex!groups'
 engine
     udr
-;
+^
 
-function replace(
+create or alter function replace(
     "Text"        varchar(8191) character set UTF8
   , "Pattern"     varchar(8191) character set UTF8
   , "Replacement" varchar(8191) character set UTF8
@@ -78,9 +46,7 @@ external name
     'fb_regex!replace'
 engine
     udr
-;
-
-end^
+^
 
 set term ;^
 *)
@@ -173,8 +139,6 @@ TReplaceFunction = class( TBwrFunction )
 end;{ TReplaceFunction }
 
 function Replace( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
-
-function firebird_udr_plugin( AStatus:IStatus; AUnloadFlagLocal:BooleanPtr; AUdrPlugin:IUdrPlugin ):BooleanPtr; cdecl;
 
 
 implementation
@@ -526,43 +490,5 @@ begin
     Result := Result;
 end;{ Replace }
 *)
-
-{ plugin call }
-
-var
-    myUnloadFlag    : BOOLEAN;
-    theirUnloadFlag : BooleanPtr;
-
-function firebird_udr_plugin( AStatus:IStatus; AUnloadFlagLocal:BooleanPtr; AUdrPlugin:IUdrPlugin ):BooleanPtr; cdecl;
-begin
-    AUdrPlugin.registerProcedure( AStatus, 'matches', TMatchesFactory.Create() );
-    AUdrPlugin.registerProcedure( AStatus, 'groups',  TGroupsFactory.Create()  );
-    AUdrPlugin.registerFunction(  AStatus, 'replace', TReplaceFactory.Create() );
-
-    theirUnloadFlag := AUnloadFlagLocal;
-    Result          := @myUnloadFlag;
-end;{ firebird_udr_plugin }
-
-procedure InitalizationProc;
-begin
-    myUnloadFlag := FALSE;
-end;{ InitalizationProc }
-
-procedure FinalizationProc;
-begin
-    if( ( theirUnloadFlag <> nil ) and ( not myUnloadFlag ) )then begin
-        theirUnloadFlag^ := TRUE;
-    end;
-end;{ FinalizationProc }
-
-initialization
-begin
-    InitalizationProc;
-end;
-
-finalization
-begin
-    FinalizationProc;
-end;
 
 end.
