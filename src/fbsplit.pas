@@ -3,7 +3,7 @@
     Date       : 2022-11-09
     Compiler   : Delphi XE3
     ©Copyright : Shalamyansky Mikhail Arkadievich
-    Contents   : Firebird UDR regular expressions support functions
+    Contents   : Firebird UDR regular expressions based split functions
     Company    : BWR
 *)
 
@@ -167,7 +167,7 @@ begin
     end;
     NumberOk := RoutineContext.WriteOutputLongint( AStatus, TSplitWordsProcedure.OUTPUT_FIELD_NUMBER, fNumber, NumberNull );
     WordOk   := RoutineContext.WriteOutputString(  AStatus, TSplitWordsProcedure.OUTPUT_FIELD_WORD,   Word,    WordNull   );
-end;{ TMatchesResultSet.fetch }
+end;{ TSplitWordsResultSet.fetch }
 
 { TSplitFactory }
 

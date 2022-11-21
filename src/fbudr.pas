@@ -414,7 +414,7 @@ begin
     if( v.Length > 0 )then begin
         SetLength( AnsiStr, v.Length );
         Move( v.Value, POINTER( AnsiStr )^, v.Length );
-        Result := AnsiStr; //converts UTF8 -> ANSI
+        Result := AnsiStr; //converts ANSI -> UTF16
     end;
 end;{ VarcharToString }
 

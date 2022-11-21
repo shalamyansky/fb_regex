@@ -29,6 +29,22 @@ procedure groups(
   , "Finish"  integer
 );
 
+procedure find(
+    "Text"    varchar(8191) character set UTF8
+  , "Pattern" varchar(8191) character set UTF8
+  , "Amount"  integer
+  , "Skip"    integer
+)returns(
+    "Number"  integer
+  , "Found"   varchar(8191) character set UTF8
+);
+
+function find_first(
+    "Text"        varchar(8191) character set UTF8
+  , "Pattern"     varchar(8191) character set UTF8
+  , "Skip"        integer
+)returns          varchar(8191) character set UTF8;
+
 function replace(
     "Text"        varchar(8191) character set UTF8
   , "Pattern"     varchar(8191) character set UTF8
@@ -77,6 +93,31 @@ procedure groups(
   , "Finish"  integer
 )external name
     'fb_regex!groups'
+engine
+    udr
+;
+
+procedure find(
+    "Text"    varchar(8191) character set UTF8
+  , "Pattern" varchar(8191) character set UTF8
+  , "Amount"  integer
+  , "Skip"    integer
+)returns(
+    "Number"  integer
+  , "Found"   varchar(8191) character set UTF8
+)external name
+    'fb_regex!find'
+engine
+    udr
+;
+
+function find_first(
+    "Text"        varchar(8191) character set UTF8
+  , "Pattern"     varchar(8191) character set UTF8
+  , "Skip"        integer
+)returns          varchar(8191) character set UTF8
+external name
+    'fb_regex!find_first'
 engine
     udr
 ;
@@ -137,6 +178,7 @@ implementation
 
 uses
     fbregex
+  , fbfind
   , fbsplit
 ;
 
@@ -146,11 +188,13 @@ var
 
 function firebird_udr_plugin( AStatus:IStatus; AUnloadFlagLocal:BooleanPtr; AUdrPlugin:IUdrPlugin ):BooleanPtr; cdecl;
 begin
-    AUdrPlugin.registerProcedure( AStatus, 'matches',     TMatchesFactory.Create()    );
-    AUdrPlugin.registerProcedure( AStatus, 'groups',      TGroupsFactory.Create()     );
-    AUdrPlugin.registerFunction(  AStatus, 'replace',     TReplaceFactory.Create()    );
-    AUdrPlugin.registerProcedure( AStatus, 'split_words', TSplitWordsFactory.Create() );
-    AUdrPlugin.registerProcedure( AStatus, 'split',       TSplitFactory.Create()      );
+    AUdrPlugin.registerProcedure( AStatus, 'matches',     fbregex.TMatchesFactory.Create()    );
+    AUdrPlugin.registerProcedure( AStatus, 'groups',      fbregex.TGroupsFactory.Create()     );
+    AUdrPlugin.registerProcedure( AStatus, 'find',        fbfind.TFindFactory.Create()        );
+    AUdrPlugin.registerFunction(  AStatus, 'find_first',  fbfind.TFindFirstFactory.Create()   );
+    AUdrPlugin.registerFunction(  AStatus, 'replace',     fbfind.TReplaceFactory.Create()     );
+    AUdrPlugin.registerProcedure( AStatus, 'split_words', fbsplit.TSplitWordsFactory.Create() );
+    AUdrPlugin.registerProcedure( AStatus, 'split',       fbsplit.TSplitFactory.Create()      );
 
     theirUnloadFlag := AUnloadFlagLocal;
     Result          := @myUnloadFlag;
@@ -158,7 +202,8 @@ end;{ firebird_udr_plugin }
 
 procedure InitalizationProc;
 begin
-    myUnloadFlag := FALSE;
+    IsMultiThread := TRUE;
+    myUnloadFlag  := FALSE;
 end;{ InitalizationProc }
 
 procedure FinalizationProc;
