@@ -36,7 +36,7 @@ Output string **groups** contains groups boundaries of the match as semicolumn d
       , finish  integer  -- first position after the group in text
     );
 
-This is selective procedure, each row is one group. The procedure just parses string **groups** returned by procedure **match** onto separate rows.
+This is selective procedure, each row is one group. The procedure just parses string **groups** returned by procedure **matches** onto separate rows.
 
 **Matches and groups** procedures are designed to work in conjunction. You can control a result by standard SQL features. See а sample:
 
