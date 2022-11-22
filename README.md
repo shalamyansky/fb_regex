@@ -38,7 +38,7 @@ Output string **groups** contains groups boundaries of the match as semicolumn d
 
 This is selective procedure, each row is one group. The procedure just parses string **groups** returned by procedure **matches** onto separate rows.
 
-**Matches and groups** procedures are designed to work in conjunction. You can control a result by standard SQL features. See а sample:
+**matches and groups** procedures are designed to work in conjunction. You can control a result by standard SQL features. See а sample:
 
 
     text : 'To be or not to be? Not to ask!'
@@ -74,7 +74,7 @@ This is selective procedure, each row is one group. The procedure just parses st
       , match   string    -- match string value
     );
 
-**Find** is a more simple selective prоcedure. It works like **matches** but returns match string value instead of match boundaries and does not support groups to extract. Sample:
+**find** is a more simple selective prоcedure. It works like **matches** but returns match string value instead of match boundaries and does not support groups to extract. Sample:
 
     text : 'To be or not to be? Not to ask!'
 
@@ -100,7 +100,7 @@ This is selective procedure, each row is one group. The procedure just parses st
       , pass    integer   -- amount to skip first rows
     )returns    string    -- first match string value;
 
-**Find_first** is a function that works like **find** but returns a single scalar result.
+**find_first** is a function that works like **find** but returns a single scalar result.
 
     text : 'To be or not to be? Not to ask!'
 
@@ -170,7 +170,7 @@ _
       , part      string    -- part between separators
     );
 
-**Split** cuts **text** onto parts delimited by **separator**. Since **separator** is not a simple string but regular exspression do not forget escape special symbols if any. 
+**split** cuts **text** onto parts delimited by **separator**. Since **separator** is not a simple string but regular exspression do not forget escape special symbols if any. 
 
     text : 'Hamlet. To be or not to be? Not to ask!'
 
@@ -199,7 +199,7 @@ _
       , word      string    -- standalone word 
     );
 
-**Split_words** picks up standalone words. It treats any digit, english (latin) or russian cyrillic letter as a word symbol. It is equavalient **find( .., '[0-9A-Za-zА-Яа-яЁё]+', , )** except a bit faster. 
+**split_words** picks up standalone words. It treats any digit, english (latin) or russian cyrillic letter as a word symbol. It is equavalient **find( .., '[0-9A-Za-zА-Яа-яЁё]+', , )** except a bit faster. 
 
     text : 'To be or not to be?'
 
