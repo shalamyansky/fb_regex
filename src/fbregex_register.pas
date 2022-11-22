@@ -1,10 +1,18 @@
 (*
-    Unit       : fb_regex
+    Unit       : fbregex_register
     Date       : 2022-11-09
     Compiler   : Delphi XE3
     ©Copyright : Shalamyansky Mikhail Arkadievich
     Contents   : Register UDR function for fb_regex project
+    Project    : https://github.com/shalamyansky/fb_regex
     Company    : BWR
+*)
+(*
+    References and thanks:
+
+    Denis Simonov. Íàïèñàíèå UDR Firebird íà Pascal.
+                   2019, IBSurgeon
+
 *)
 //DDL definition
 (*
@@ -14,71 +22,72 @@ create or alter package regex
 as begin
 
 procedure matches(
-    "Text"    varchar(8191) character set UTF8
-  , "Pattern" varchar(8191) character set UTF8
+    text    varchar(8191) character set UTF8
+  , pattern varchar(8191) character set UTF8
 )returns(
-    "Number"  integer
-  , "Groups"  varchar(8191) character set UTF8
+    number  integer
+  , groups  varchar(8191) character set UTF8
 );
 
 procedure groups(
-    "Groups"  varchar(8191) character set UTF8
+    groups varchar(8191) character set UTF8
 )returns(
-    "Number"  integer
-  , "Start"   integer
-  , "Finish"  integer
+    number integer
+  , origin integer
+  , finish integer
 );
 
 procedure find(
-    "Text"    varchar(8191) character set UTF8
-  , "Pattern" varchar(8191) character set UTF8
-  , "Amount"  integer
-  , "Skip"    integer
+    text    varchar(8191) character set UTF8
+  , pattern varchar(8191) character set UTF8
+  , amount  integer
+  , pass    integer
 )returns(
-    "Number"  integer
-  , "Found"   varchar(8191) character set UTF8
+    number  integer
+  , match   varchar(8191) character set UTF8
 );
 
 function find_first(
-    "Text"        varchar(8191) character set UTF8
-  , "Pattern"     varchar(8191) character set UTF8
-  , "Skip"        integer
-)returns          varchar(8191) character set UTF8;
+    text    varchar(8191) character set UTF8
+  , pattern varchar(8191) character set UTF8
+  , pass    integer
+)returns    varchar(8191) character set UTF8;
 
 function replace(
-    "Text"        varchar(8191) character set UTF8
-  , "Pattern"     varchar(8191) character set UTF8
-  , "Replacement" varchar(8191) character set UTF8
-  , "Amount"      integer
-  , "Skip"        integer
-)returns          varchar(8191) character set UTF8;
-
-procedure split_words(
-    "Text"   varchar(8191) character set UTF8
-)returns(
-    "Number" integer
-  , "Word"   varchar(8191) character set UTF8
-);
+    text        varchar(8191) character set UTF8
+  , pattern     varchar(8191) character set UTF8
+  , replacement varchar(8191) character set UTF8
+  , amount      integer
+  , pass        integer
+)returns        varchar(8191) character set UTF8;
 
 procedure split(
-    "Text"      varchar(8191) character set UTF8
-  , "Separator" varchar(8191) character set UTF8
+    text      varchar(8191) character set UTF8
+  , separator varchar(8191) character set UTF8
 )returns(
-    "Number"    integer
-  , "Part"      varchar(8191) character set UTF8
+    number    integer
+  , part      varchar(8191) character set UTF8
+);
+
+procedure split_words(
+    text   varchar(8191) character set UTF8
+)returns(
+    number integer
+  , word   varchar(8191) character set UTF8
 );
 
 end^
 
-recreate package body regex
-as begin
+RECREATE PACKAGE BODY REGEX
+AS
+begin
 
 procedure matches(
-    "Text"    varchar(8191) character set UTF8
-  , "Pattern" varchar(8191) character set UTF8
+    text    varchar(8191) character set UTF8
+  , pattern varchar(8191) character set UTF8
 )returns(
-    "Number"  integer
-  , "Groups"  varchar(8191) character set UTF8
+    number  integer
+  , groups  varchar(8191) character set UTF8
 )external name
     'fb_regex!matches'
 engine
@@ -86,11 +95,11 @@ engine
 ;
 
 procedure groups(
-    "Groups"  varchar(8191) character set UTF8
+    groups varchar(8191) character set UTF8
 )returns(
-    "Number"  integer
-  , "Start"   integer
-  , "Finish"  integer
+    number integer
+  , origin integer
+  , finish integer
 )external name
     'fb_regex!groups'
 engine
@@ -98,13 +107,13 @@ engine
 ;
 
 procedure find(
-    "Text"    varchar(8191) character set UTF8
-  , "Pattern" varchar(8191) character set UTF8
-  , "Amount"  integer
-  , "Skip"    integer
+    text    varchar(8191) character set UTF8
+  , pattern varchar(8191) character set UTF8
+  , amount  integer
+  , pass    integer
 )returns(
-    "Number"  integer
-  , "Found"   varchar(8191) character set UTF8
+    number  integer
+  , match   varchar(8191) character set UTF8
 )external name
     'fb_regex!find'
 engine
@@ -112,10 +121,10 @@ engine
 ;
 
 function find_first(
-    "Text"        varchar(8191) character set UTF8
-  , "Pattern"     varchar(8191) character set UTF8
-  , "Skip"        integer
-)returns          varchar(8191) character set UTF8
+    text    varchar(8191) character set UTF8
+  , pattern varchar(8191) character set UTF8
+  , pass    integer
+)returns    varchar(8191) character set UTF8
 external name
     'fb_regex!find_first'
 engine
@@ -123,37 +132,37 @@ engine
 ;
 
 function replace(
-    "Text"        varchar(8191) character set UTF8
-  , "Pattern"     varchar(8191) character set UTF8
-  , "Replacement" varchar(8191) character set UTF8
-  , "Amount"      integer
-  , "Skip"        integer
-)returns          varchar(8191) character set UTF8
+    text        varchar(8191) character set UTF8
+  , pattern     varchar(8191) character set UTF8
+  , replacement varchar(8191) character set UTF8
+  , amount      integer
+  , pass        integer
+)returns        varchar(8191) character set UTF8
 external name
     'fb_regex!replace'
 engine
     udr
 ;
 
-procedure split_words(
-    "Text"   varchar(8191) character set UTF8
+procedure split(
+    text      varchar(8191) character set UTF8
+  , separator varchar(8191) character set UTF8
 )returns(
-    "Number" integer
-  , "Word"   varchar(8191) character set UTF8
+    number    integer
+  , part      varchar(8191) character set UTF8
 )external name
-    'fb_regex!split_words'
+    'fb_regex!split'
 engine
     udr
 ;
 
-procedure split(
-    "Text"      varchar(8191) character set UTF8
-  , "Separator" varchar(8191) character set UTF8
+procedure split_words(
+    text   varchar(8191) character set UTF8
 )returns(
-    "Number"    integer
-  , "Part"      varchar(8191) character set UTF8
+    number integer
+  , word   varchar(8191) character set UTF8
 )external name
-    'fb_regex!split'
+    'fb_regex!split_words'
 engine
     udr
 ;

@@ -4,6 +4,7 @@
     Compiler   : Delphi XE3
     ©Copyright : Shalamyansky Mikhail Arkadievich
     Contents   : Firebird UDR regular expressions based split functions
+    Project    : https://github.com/shalamyansky/fb_regex
     Company    : BWR
 *)
 
@@ -11,25 +12,25 @@
 (*
 set term ^;
 
-create or alter procedure split_words(
-    "Text"   varchar(8191) character set UTF8
+create or alter procedure split(
+    text      varchar(8191) character set UTF8
+  , separator varchar(8191) character set UTF8
 )returns(
-    "Number" integer
-  , "Word"   varchar(8191) character set UTF8
+    number    integer
+  , part      varchar(8191) character set UTF8
 )external name
-    'fb_regex!split_words'
+    'fb_regex!split'
 engine
     udr
 ^
 
-create or alter procedure split(
-    "Text"      varchar(8191) character set UTF8
-    "Separator" varchar(8191) character set UTF8
+create or alter procedure split_words(
+    text   varchar(8191) character set UTF8
 )returns(
-    "Number"    integer
-  , "Part"      varchar(8191) character set UTF8
+    number integer
+  , word   varchar(8191) character set UTF8
 )external name
-    'fb_regex!split'
+    'fb_regex!split_words'
 engine
     udr
 ^

@@ -4,6 +4,7 @@
     Compiler   : Delphi XE3
     ©Copyright : Shalamyansky Mikhail Arkadievich
     Contents   : Firebird UDR regular expressions support functions
+    Project    : https://github.com/shalamyansky/fb_regex
     Company    : BWR
 *)
 
@@ -12,11 +13,11 @@
 set term ^;
 
 create or alter procedure matches(
-    "Text"    varchar(8191) character set UTF8
-  , "Pattern" varchar(8191) character set UTF8
+    text    varchar(8191) character set UTF8
+  , pattern varchar(8191) character set UTF8
 )returns(
-    "Number"  integer
-  , "Groups"  varchar(8191) character set UTF8
+    number  integer
+  , groups  varchar(8191) character set UTF8
 )external name
     'fb_regex!matches'
 engine
@@ -24,26 +25,13 @@ engine
 ^
 
 create or alter procedure groups(
-    "Groups"  varchar(8191) character set UTF8
+    groups varchar(8191) character set UTF8
 )returns(
-    "Number"  integer
-  , "Start"   integer
-  , "Finish"  integer
+    number integer
+  , origin integer
+  , finish integer
 )external name
     'fb_regex!groups'
-engine
-    udr
-^
-
-create or alter function replace(
-    "Text"        varchar(8191) character set UTF8
-  , "Pattern"     varchar(8191) character set UTF8
-  , "Replacement" varchar(8191) character set UTF8
-  , "Amount"      integer
-  , "Skip"        integer
-)returns          varchar(8191) character set UTF8
-external name
-    'fb_regex!replace'
 engine
     udr
 ^

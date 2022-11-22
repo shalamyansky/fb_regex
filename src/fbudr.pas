@@ -4,7 +4,15 @@
     Compiler   : Delphi XE3
     ©Copyright : Shalamyansky Mikhail Arkadievich
     Contents   : Firebird UDR helper classes and utilities
+    Project    : https://github.com/shalamyansky/fb_regex
     Company    : BWR
+*)
+(*
+    Based on:
+
+    Denis Simonov. Íàïèñàíèå UDR Firebird íà Pascal.
+                   2019, IBSurgeon
+
 *)
 unit fbudr;
 
@@ -340,7 +348,7 @@ begin
     if( ( Length( s ) = 0 ) or ( Len = 0 ) )then begin
         Result.Value[ 0 ] := AnsiChar( #32 );
     end else begin
-        AnsiStr := s;  //convert UTF16 -> ANSI
+        AnsiStr := s;  //converts UTF16 -> ANSI
         AnsiStr := Rightpad( Copy( AnsiStr, 1, Len ), Len, AnsiChar( #32 ) );
         if( Length( AnsiStr ) > 0 )then begin
             Move( POINTER( AnsiStr )^, Result.Value, Length( AnsiStr ) );
@@ -445,7 +453,7 @@ var
 begin
     Finalize( Result );
     if( Length( s ) > 0 )then begin
-        AnsiStr := s;  //convert UTF16 -> ANSI
+        AnsiStr := s;  //converts UTF16 -> ANSI
         Result.Length := Length( AnsiStr );
         if( Result.Length > MaxLength )then begin
             Result.Length := MaxLength;
@@ -461,7 +469,7 @@ begin
     System.Finalize( Result );
     System.Finalize( Utf8Str );
     if( Length( s ) > 0 )then begin
-        Utf8Str := s;  //convert UTF16 -> UTF8
+        Utf8Str := s;  //converts UTF16 -> UTF8
         if( Length( Utf8Str ) > MaxLength )then begin
             SetLength( Utf8Str, MaxLength );
         end;
@@ -907,7 +915,7 @@ begin
     IsNull := TRUE;
     if( GetFieldMetadata( Status, OUTPUT_MESSAGE, FieldIndex, FieldMetadata ) )then begin
         PWORDBOOL( pOutputMessage + FieldMetadata.NullOffset )^ := IsNull;
-        if( ( not IsNull ) )then begin
+        if( not IsNull )then begin
             pBlobId := ISC_QUADPtr( pInputMessage + FieldMetadata.Offset );
             Result  := WriteBlobBytes( Status, Context, pBlobId, POINTER( Value ), Length( Value ) );
         end;

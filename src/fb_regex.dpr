@@ -4,6 +4,7 @@
     Compiler   : Delphi XE3
     ©Copyright : Shalamyansky Mikhail Arkadievich
     Contents   : Firebird UDR regular expressions plugin module
+    Project    : https://github.com/shalamyansky/fb_regex
     Company    : BWR
 *)
 library fb_regex;

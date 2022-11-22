@@ -4,6 +4,7 @@
     Compiler   : Delphi XE3
     ©Copyright : Shalamyansky Mikhail Arkadievich
     Contents   : Firebird UDR regular expressions based find functions
+    Project    : https://github.com/shalamyansky/fb_regex
     Company    : BWR
 *)
 
@@ -12,13 +13,13 @@
 set term ^;
 
 create or alter procedure find(
-    "Text"    varchar(8191) character set UTF8
-  , "Pattern" varchar(8191) character set UTF8
-  , "Amount"  integer
-  , "Skip"    integer
+    text    varchar(8191) character set UTF8
+  , pattern varchar(8191) character set UTF8
+  , amount  integer
+  , pass    integer
 )returns(
-    "Number"  integer
-  , "Found"   varchar(8191) character set UTF8
+    number  integer
+  , match   varchar(8191) character set UTF8
 )external name
     'fb_regex!find'
 engine
@@ -26,23 +27,23 @@ engine
 ^
 
 create or alter function find_first(
-    "Text"    varchar(8191) character set UTF8
-  , "Pattern" varchar(8191) character set UTF8
-  , "Skip"    integer
-)returns      varchar(8191) character set UTF8
+    text    varchar(8191) character set UTF8
+  , pattern varchar(8191) character set UTF8
+  , pass    integer
+)returns    varchar(8191) character set UTF8
 external name
-    'fb_regex!find_fisrt'
+    'fb_regex!find_first'
 engine
     udr
 ^
 
-function replace(
-    "Text"        varchar(8191) character set UTF8
-  , "Pattern"     varchar(8191) character set UTF8
-  , "Replacement" varchar(8191) character set UTF8
-  , "Amount"      integer
-  , "Skip"        integer
-)returns          varchar(8191) character set UTF8
+create or alter function replace(
+    text        varchar(8191) character set UTF8
+  , pattern     varchar(8191) character set UTF8
+  , replacement varchar(8191) character set UTF8
+  , amount      integer
+  , pass        integer
+)returns        varchar(8191) character set UTF8
 external name
     'fb_regex!replace'
 engine
