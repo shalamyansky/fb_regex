@@ -52,7 +52,7 @@ This is selective procedure, each row is one group. The procedure just parses st
           , substring( :text from g.origin for g.finish - g.origin ) as word
         from
             regex.matches( :text, '(?i)not\s+to\s+(\w+)' ) m
-          left join regex.groups( m.groups ) m
+          left join regex.groups( m.groups ) g
             on ( g.number = 1 )
         where
           m.number = 2
