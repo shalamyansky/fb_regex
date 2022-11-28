@@ -108,7 +108,7 @@ This is selective procedure, each row is one group. The procedure just parses st
 
     solution:
         select
-            regex.find( :text, '(?i)to\s+(\w+)', null )
+            regex.find_first( :text, '(?i)to\s+(\w+)', null )
           from
             rdb$database
 
