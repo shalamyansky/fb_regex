@@ -1,5 +1,5 @@
 # fb_regex
-This is an extension library for DBMS Firebird 3.0/4.0 to support regular expressions in SQL.
+This is an extension library for RDBMS Firebird 3.0/4.0 to support regular expressions in SQL.
 
 ## Basis
 
