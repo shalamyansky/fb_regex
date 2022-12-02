@@ -98,7 +98,7 @@ This is selective procedure, each row is one group. The procedure just parses st
         text    string    -- text to explore
       , pattern string    -- regular expression pattern to seek
       , pass    integer   -- amount to skip first rows
-    )returns    string    -- first match string value;
+    )returns    string;   -- first match string value
 
 **find_first** is a function that works like **find** but returns a single scalar result.
 
@@ -125,7 +125,7 @@ This is selective procedure, each row is one group. The procedure just parses st
       , replacement string    -- value to replace with
       , amount      integer   -- amount of matches to replace 
       , pass        integer   -- amount to skip first matches
-    )returns        string    -- updated text
+    )returns        string;   -- updated text
 
 Function **replace** seeks a matches in **text** and replaces its with **replacement**. Supports **$n** syntax in **replacement**, where **n** is a **pattern** group number.  
 
