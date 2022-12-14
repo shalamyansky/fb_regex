@@ -127,7 +127,7 @@ This is selective procedure, each row is one group. The procedure just parses st
       , pass        integer   -- amount to skip first matches
     )returns        string;   -- updated text
 
-Function **replace** seeks a matches in **text** and replaces its with **replacement**. Supports **$n** syntax in **replacement**, where **n** is a **pattern** group number.  
+Function **replace** seeks matches in **text** and replaces its with **replacement**. Supports **$n** syntax in **replacement**, where **n** is a **pattern** group number.  
 
     text : 'x = position (text,substring); y = position(a,b);'
 
