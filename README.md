@@ -209,7 +209,7 @@ _
         select
             *
           from
-            regex.split_words( text, '[.?!]' )
+            regex.split_words( text )
 
      result:    
           NUMBER SPLIT_WORDS
