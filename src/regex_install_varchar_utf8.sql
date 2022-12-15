@@ -1,21 +1,16 @@
-(*
-    Unit       : fbregex_register
-    Date       : 2022-11-09
-    Compiler   : Delphi XE3
-    ©Copyright : Shalamyansky Mikhail Arkadievich
-    Contents   : Register UDR function for fb_regex project
-    Project    : https://github.com/shalamyansky/fb_regex
-    Company    : BWR
-*)
-(*
-    References and thanks:
+-- Installation
+-- (for Windows only)
+--
+-- 1. Copy fb_regex.dll to %firebird%\plugins\udr
+--      where %firebird% is Firebird 4(3) server root directory.
+--
+--    Make sure library module matches the Firebird bitness.
+--
+-- 2. You can change all or some varchar() parameters to any length char, varchar
+--    or blob sub_type text with character set UTF8 or WIN1251.
+--
+-- 3. Connect to target database and execute this script.
 
-    Denis Simonov. Firebird UDR writing in Pascal.
-                   2019, IBSurgeon
-
-*)
-//DDL definition
-(*
 set term ^;
 
 create or alter package regex
@@ -61,19 +56,19 @@ function replace(
   , pass        integer
 )returns        varchar(8191) character set UTF8;
 
+procedure split_words(
+    text   varchar(8191) character set UTF8
+)returns(
+    number integer
+  , word   varchar(8191) character set UTF8
+);
+
 procedure split(
     text      varchar(8191) character set UTF8
   , separator varchar(8191) character set UTF8
 )returns(
     number    integer
   , part      varchar(8191) character set UTF8
-);
-
-procedure split_words(
-    text   varchar(8191) character set UTF8
-)returns(
-    number integer
-  , word   varchar(8191) character set UTF8
 );
 
 end^
@@ -144,6 +139,17 @@ engine
     udr
 ;
 
+procedure split_words(
+    text   varchar(8191) character set UTF8
+)returns(
+    number integer
+  , word   varchar(8191) character set UTF8
+)external name
+    'fb_regex!split_words'
+engine
+    udr
+;
+
 procedure split(
     text      varchar(8191) character set UTF8
   , separator varchar(8191) character set UTF8
@@ -156,80 +162,6 @@ engine
     udr
 ;
 
-procedure split_words(
-    text   varchar(8191) character set UTF8
-)returns(
-    number integer
-  , word   varchar(8191) character set UTF8
-)external name
-    'fb_regex!split_words'
-engine
-    udr
-;
-
 end^
 
 set term ;^
-*)
-unit fbregex_register;
-
-interface
-
-uses
-    firebird
-;
-
-function firebird_udr_plugin( AStatus:IStatus; AUnloadFlagLocal:BooleanPtr; AUdrPlugin:IUdrPlugin ):BooleanPtr; cdecl;
-
-
-implementation
-
-
-uses
-    fbregex
-  , fbfind
-  , fbsplit
-;
-
-var
-    myUnloadFlag    : BOOLEAN;
-    theirUnloadFlag : BooleanPtr;
-
-function firebird_udr_plugin( AStatus:IStatus; AUnloadFlagLocal:BooleanPtr; AUdrPlugin:IUdrPlugin ):BooleanPtr; cdecl;
-begin
-    AUdrPlugin.registerProcedure( AStatus, 'matches',     fbregex.TMatchesFactory.Create()    );
-    AUdrPlugin.registerProcedure( AStatus, 'groups',      fbregex.TGroupsFactory.Create()     );
-    AUdrPlugin.registerProcedure( AStatus, 'find',        fbfind.TFindFactory.Create()        );
-    AUdrPlugin.registerFunction(  AStatus, 'find_first',  fbfind.TFindFirstFactory.Create()   );
-    AUdrPlugin.registerFunction(  AStatus, 'replace',     fbfind.TReplaceFactory.Create()     );
-    AUdrPlugin.registerProcedure( AStatus, 'split_words', fbsplit.TSplitWordsFactory.Create() );
-    AUdrPlugin.registerProcedure( AStatus, 'split',       fbsplit.TSplitFactory.Create()      );
-
-    theirUnloadFlag := AUnloadFlagLocal;
-    Result          := @myUnloadFlag;
-end;{ firebird_udr_plugin }
-
-procedure InitalizationProc;
-begin
-    IsMultiThread := TRUE;
-    myUnloadFlag  := FALSE;
-end;{ InitalizationProc }
-
-procedure FinalizationProc;
-begin
-    if( ( theirUnloadFlag <> nil ) and ( not myUnloadFlag ) )then begin
-        theirUnloadFlag^ := TRUE;
-    end;
-end;{ FinalizationProc }
-
-initialization
-begin
-    InitalizationProc;
-end;
-
-finalization
-begin
-    FinalizationProc;
-end;
-
-end.

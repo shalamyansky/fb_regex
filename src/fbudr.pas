@@ -10,7 +10,7 @@
 (*
     Based on:
 
-    Denis Simonov. Написание UDR Firebird на Pascal.
+    Denis Simonov. Firebird UDR writing in Pascal.
                    2019, IBSurgeon
 
 *)
@@ -515,7 +515,7 @@ function ReadBlobBytes( Status:IStatus; Context:IExternalContext; BlobId:ISC_QUA
 var
     Attachment  : IAttachment;
     Transaction : ITransaction;
-    Blob : IBlob;
+    Blob        : IBlob;
 begin
     System.Finalize( Result );
     if( ( Status <> nil ) and ( Context <> nil ) )then begin
@@ -523,19 +523,20 @@ begin
             Attachment  := nil;
             Transaction := nil;
             Blob        := nil;
-            Attachment  := Context.getAttachment(  Status );
+            Attachment  := Context.getAttachment( Status );
             if( Attachment <> nil )then begin
                 Transaction := Context.getTransaction( Status );
                 if( Transaction <> nil )then begin
                     Blob := Attachment.openBlob( Status, Transaction, @BlobId, 0, nil );
                     if( Blob <> nil )then begin
                         Result := ReadBlobBytes( Status, Blob );
+                        Blob.close( Status );
+                        Blob := nil;
                     end;
                 end;
             end;
         finally
             if( Blob <> nil )then begin
-                Blob.close( Status );
                 Blob.release;
                 Blob := nil;
             end;
@@ -548,7 +549,6 @@ begin
                 Attachment  := nil;
             end;
         end;
-
     end;
 end;{ ReadBlobBytes }
 
@@ -579,7 +579,7 @@ function WriteBlobBytes( Status:IStatus; Context:IExternalContext; pBlobId:ISC_Q
 var
     Attachment  : IAttachment;
     Transaction : ITransaction;
-    Blob : IBlob;
+    Blob        : IBlob;
 begin
     Result := FALSE;
     if( ( Status <> nil ) and ( Context <> nil ) )then begin
@@ -594,12 +594,13 @@ begin
                     Blob := Attachment.createBlob( Status, Transaction, pBlobId, 0, nil );
                     if( Blob <> nil )then begin
                         Result := WriteBlobBytes( Status, Blob, pBytes, bLength );
+                        Blob.close( Status );
+                        Blob := nil;
                     end;
                 end;
             end;
         finally
             if( Blob <> nil )then begin
-                Blob.close( Status );
                 Blob.release;
                 Blob := nil;
             end;

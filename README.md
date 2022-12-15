@@ -9,9 +9,9 @@ Other side the DLL is compiled by Delphi XE3 and uses the RegularExpression unit
 
 ## Routines
 
-Routines are assembled into package **regex**. Pseudotype **string** marks any of string type **char**, **varchar** of any length or **blob sub_type text**. All the routines can accept and return any string type.
+Routines are assembled into package ***regex***. Pseudotype ***string*** marks any of string type ***char***, ***varchar*** of any length or ***blob sub_type text***. All the routines can accept and return any string type.
 
-## matches
+## procedure *matches*
 
     procedure matches(
         text    string    -- text to explore
@@ -23,10 +23,10 @@ Routines are assembled into package **regex**. Pseudotype **string** marks any o
 
 This is selective procedure, each result set row contains data of one match.
 
-Output string **groups** contains groups boundaries of the match as semicolumn delimited pairs **start:finish** where start and finish are numeric positions in text started from 1.    
+Output string ***groups*** contains groups boundaries of the match as semicolumn delimited pairs ***start:finish*** where ***start*** and ***finish*** are numeric positions in text started from 1.    
     
 
-## groups
+## procedure *groups*
 
     procedure groups(
         groups  string   -- string containing groups boundaries of match
@@ -36,9 +36,9 @@ Output string **groups** contains groups boundaries of the match as semicolumn d
       , finish  integer  -- first position after the group in text
     );
 
-This is selective procedure, each row is one group. The procedure just parses string **groups** returned by procedure **matches** onto separate rows.
+This is selective procedure, each row is one group. The procedure just parses string ***groups*** returned by procedure ***matches*** onto separate rows.
 
-**matches and groups** procedures are designed to work in conjunction. You can control a result by standard SQL features. See а sample:
+***matches and groups*** procedures are designed to work in conjunction. You can control a result by standard SQL features. See а sample:
 
 
     text : 'To be or not to be? Not to ask!'
@@ -62,7 +62,7 @@ This is selective procedure, each row is one group. The procedure just parses st
         ====== ============ =====
             28           31 ask
 
-## find
+## procedure *find*
 
     procedure find(
         text    string    -- text to explore
@@ -74,7 +74,7 @@ This is selective procedure, each row is one group. The procedure just parses st
       , match   string    -- match string value
     );
 
-**find** is a more simple selective prоcedure. It works like **matches** but returns match string value instead of match boundaries and does not support groups to extract. Sample:
+***find*** is a more simple selective prоcedure. It works like ***matches*** but returns match string value instead of match boundaries and does not support groups to extract. Sample:
 
     text : 'To be or not to be? Not to ask!'
 
@@ -92,7 +92,7 @@ This is selective procedure, each row is one group. The procedure just parses st
              1 to be
              2 to ask
 
-## find_first
+## function *find_first*
 
     function find_first(
         text    string    -- text to explore
@@ -100,7 +100,7 @@ This is selective procedure, each row is one group. The procedure just parses st
       , pass    integer   -- amount to skip first rows
     )returns    string;   -- first match string value
 
-**find_first** is a function that works like **find** but returns a single scalar result.
+***find_first*** is a function that works like ***find*** but returns a single scalar result.
 
     text : 'To be or not to be? Not to ask!'
 
@@ -117,7 +117,7 @@ This is selective procedure, each row is one group. The procedure just parses st
         ==========
         not to be
 
-## replace
+## function *replace*
 
     function replace(
         text        string    -- text to update
@@ -127,7 +127,7 @@ This is selective procedure, each row is one group. The procedure just parses st
       , pass        integer   -- amount to skip first matches
     )returns        string;   -- updated text
 
-Function **replace** seeks matches in **text** and replaces its with **replacement**. Supports **$n** syntax in **replacement**, where **n** is a **pattern** group number.  
+Function ***replace*** seeks matches in ***text*** and replaces its with ***replacement***. Supports **$n** syntax in ***replacement***, where **n** is a ***pattern*** group number.  
 
     text : 'x = position (text,substring); y = position(a,b);'
 
@@ -160,7 +160,7 @@ _
         ==========
         x = position (substring,text); y = position(b,a);
 
-## split
+## procedure *split*
 
     procedure split(
         text      string    -- text to explore
@@ -170,7 +170,7 @@ _
       , part      string    -- part between separators
     );
 
-**split** cuts **text** onto parts delimited by **separator**. Since **separator** is not a simple string but regular exspression do not forget escape special symbols if any. 
+***split*** cuts ***text*** onto parts delimited by ***separator***. Since ***separator*** is not a simple string but regular exspression do not forget escape special symbols if any. 
 
     text : 'Hamlet. To be or not to be? Not to ask!'
 
@@ -190,7 +190,7 @@ _
                3 Not to ask
                4 <null>
 
-## split_words
+## procedure *split_words*
 
     procedure split_words(
         text      string    -- text to explore
@@ -199,7 +199,7 @@ _
       , word      string    -- standalone word 
     );
 
-**split_words** picks up standalone words. It treats any digit, english (latin) or russian cyrillic letter as a word symbol. It is equavalient **find( .., '[0-9A-Za-zА-Яа-яЁё]+', , )** except a bit faster. 
+***split_words*** picks up standalone words. It treats any digit, english (latin) or russian cyrillic letter as a word symbol. It is equavalient ***find*****( .., '[0-9A-Za-zА-Яа-яЁё]+', , )** except a bit faster. 
 
     text : 'To be or not to be?'
 
@@ -237,8 +237,8 @@ Supports 2 character sets: UTF8 (1-4 bytes/symbol) and WIN1251 (1-byte russian c
 
 0. Download a release package.
 
-1. Copy fb_regex.dll to %FIREBIRD%\plugins\udr
-   where %FIREBIRD% is Firebird 4(3) server root directory.
+1. Copy fb_regex.dll to %firebird%\plugins\udr
+   where %firebird% is Firebird 4(3) server root directory.
    Make sure library module matches the Firebird bitness.
 
 2. Look at script in fb_regex_utf8.sql. You can change all or some varchar() parameters to any length char, varchar
@@ -251,4 +251,4 @@ Supports 2 character sets: UTF8 (1-4 bytes/symbol) and WIN1251 (1-byte russian c
 
 You can use binaries as you see fit.
 
-If you get code or part of code please save my name and a link [here](https://github.com/shalamyansky/fb_regex).   
+If you get code or part of code please keep my name and a link [here](https://github.com/shalamyansky/fb_regex).   
