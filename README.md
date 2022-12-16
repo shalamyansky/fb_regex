@@ -199,7 +199,7 @@ _
       , word      string    -- standalone word 
     );
 
-***split_words*** picks up standalone words. It treats any digit, english (latin) or russian cyrillic letter as a word symbol. It is equavalient ***find*** **( .., '[0-9A-Za-zА-Яа-яЁё]+', , )** except a bit faster. 
+***split_words*** picks up standalone words. It treats any digit, english (latin) or russian cyrillic letter as a word symbol. It is equavalent ***find*** **( .., '[0-9A-Za-zА-Яа-яЁё]+', , )** except a bit faster. 
 
     text : 'To be or not to be?'
 
