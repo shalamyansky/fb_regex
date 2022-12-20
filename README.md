@@ -23,7 +23,7 @@ Routines are assembled into package ***regex***. Pseudotype ***string*** marks a
 
 This is selective procedure, each result set row contains data of one match.
 
-Output string ***groups*** contains groups boundaries of the match as semicolumn delimited pairs ***start:finish*** where ***start*** and ***finish*** are numeric positions in text started from 1.    
+Output string ***groups*** contains groups boundaries of the match as semicolumn delimited pairs ***start:finish*** where ***start*** and ***finish*** are numeric positions in ***text*** started from 1.    
     
 
 ## procedure *groups*
