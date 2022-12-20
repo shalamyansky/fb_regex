@@ -170,7 +170,7 @@ _
       , part      string    -- part between separators
     );
 
-***split*** cuts ***text*** onto parts delimited by ***separator***. Since ***separator*** is not a simple string but regular exspression do not forget escape special symbols if any. 
+***split*** cuts ***text*** onto parts delimited by ***separator***. Since ***separator*** is not a simple string but regular exspression do not forget to escape special symbols if any. 
 
     text : 'Hamlet. To be or not to be? Not to ask!'
 
