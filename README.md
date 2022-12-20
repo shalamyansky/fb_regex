@@ -38,7 +38,7 @@ Output string ***groups*** contains groups boundaries of the match as semicolumn
 
 This is selective procedure, each row is one group. The procedure just parses string ***groups*** returned by procedure ***matches*** onto separate rows.
 
-***matches and groups*** procedures are designed to work in conjunction. You can control a result by standard SQL features. See а sample:
+***matches*** and ***groups*** procedures are designed to work in conjunction. You can control a result by standard SQL features. See а sample:
 
 
     text : 'To be or not to be? Not to ask!'
