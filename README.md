@@ -223,7 +223,7 @@ _
 
 ## Limitations
 
-Regular expression syntax defined by PCRE 7.9.
+Regular expression syntax is defined by PCRE 7.9.
 
 No limits for strings length and result set volume.
 
