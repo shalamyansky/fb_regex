@@ -23,7 +23,7 @@ Routines are assembled into package ***regex***. Pseudotype ***string*** marks a
 
 This is selective procedure, each result set row contains data of one match.
 
-Output string ***groups*** contains groups boundaries of the match as semicolumn delimited pairs ***start:finish*** where ***start*** and ***finish*** are numeric positions in text started from 1.    
+Output string ***groups*** contains groups boundaries of the match as semicolumn delimited pairs ***start:finish*** where ***start*** and ***finish*** are numeric positions in ***text*** started from 1.    
     
 
 ## procedure *groups*
@@ -38,7 +38,7 @@ Output string ***groups*** contains groups boundaries of the match as semicolumn
 
 This is selective procedure, each row is one group. The procedure just parses string ***groups*** returned by procedure ***matches*** onto separate rows.
 
-***matches and groups*** procedures are designed to work in conjunction. You can control a result by standard SQL features. See а sample:
+***matches*** and ***groups*** procedures are designed to work in conjunction. You can control a result by standard SQL features. See а sample:
 
 
     text : 'To be or not to be? Not to ask!'
@@ -170,7 +170,7 @@ _
       , part      string    -- part between separators
     );
 
-***split*** cuts ***text*** onto parts delimited by ***separator***. Since ***separator*** is not a simple string but regular exspression do not forget escape special symbols if any. 
+***split*** cuts ***text*** onto parts delimited by ***separator***. Since ***separator*** is not a simple string but regular exspression do not forget to escape special symbols if any. 
 
     text : 'Hamlet. To be or not to be? Not to ask!'
 
@@ -199,7 +199,7 @@ _
       , word      string    -- standalone word 
     );
 
-***split_words*** picks up standalone words. It treats any digit, english (latin) or russian cyrillic letter as a word symbol. It is equavalient ***find*** **( .., '[0-9A-Za-zА-Яа-яЁё]+', , )** except a bit faster. 
+***split_words*** picks up standalone words. It treats any digit, english (latin) or russian cyrillic letter as a word symbol. It is equavalent ***find*** **( .., '[0-9A-Za-zА-Яа-яЁё]+', , )** except a bit faster. 
 
     text : 'To be or not to be?'
 
@@ -223,7 +223,7 @@ _
 
 ## Limitations
 
-Regular expression syntax defined by PCRE 7.9.
+Regular expression syntax is defined by PCRE 7.9.
 
 No limits for strings length and result set volume.
 
