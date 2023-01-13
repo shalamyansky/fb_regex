@@ -92,7 +92,7 @@ TFindResultSet = class( TBwrResultSet )
     fMatch  : TMatch;
     fNumber : LONGINT;
   public
-    constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus ); override;
+    constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
     function fetch( AStatus:IStatus ):BOOLEAN; override;
 end;{ TFindResultSet }
 
@@ -151,19 +151,19 @@ end;{ TFindFactory.newItem }
 function TFindProcedure.open( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER ):IExternalResultSet;
 begin
     inherited open( AStatus, AContext, aInMsg, aOutMsg );
-    Result := TFindResultSet.create( Self, AStatus );
+    Result := TFindResultSet.create( Self, AStatus, AContext, AInMsg, AOutMsg );
 end;{ TFindProcedure.open }
 
 { TSplitWordsResultSet }
 
-constructor TFindResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus );
+constructor TFindResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER );
 var
     Text,     Pattern : UnicodeString;
     Skip              : LONGINT;
     TextNull, PatternNull, AmountNull, SkipNull : WORDBOOL;
     TextOk,   PatternOk,   AmountOk,   SkipOk   : BOOLEAN;
 begin
-    inherited Create( ASelectiveProcedure, AStatus );
+    inherited Create( ASelectiveProcedure, AStatus, AContext, AInMsg, AOutMsg );
 
     TextOk    := RoutineContext.ReadInputString(  AStatus, TFindProcedure.INPUT_FIELD_TEXT,    Text,    TextNull    );
     PatternOk := RoutineContext.ReadInputString(  AStatus, TFindProcedure.INPUT_FIELD_PATTERN, Pattern, PatternNull );

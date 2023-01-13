@@ -72,7 +72,7 @@ TSplitWordsResultSet = class( TBwrResultSet )
     fMatch  : TMatch;
     fNumber : LONGINT;
   public
-    constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus ); override;
+    constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
     function fetch( AStatus:IStatus ):BOOLEAN; override;
 end;{ TSplitsWordResultSet }
 
@@ -100,7 +100,7 @@ TSplitResultSet = class( TBwrResultSet )
     fMatch  : TMatch;
     fNumber : LONGINT;
   public
-    constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus ); override;
+    constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
     function fetch( AStatus:IStatus ):BOOLEAN; override;
 end;{ TSplitsWordResultSet }
 
@@ -125,18 +125,18 @@ end;{ TSplitWordsFactory.newItem }
 function TSplitWordsProcedure.open( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER ):IExternalResultSet;
 begin
     inherited open( AStatus, AContext, aInMsg, aOutMsg );
-    Result := TSplitWordsResultSet.create( Self, AStatus );
+    Result := TSplitWordsResultSet.create( Self, AStatus, AContext, AInMsg, AOutMsg );
 end;{ TSplitWordsProcedure.open }
 
 { TSplitWordsResultSet }
 
-constructor TSplitWordsResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus );
+constructor TSplitWordsResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER );
 var
     Text     : UnicodeString;
     TextNull : WORDBOOL;
     TextOk   : BOOLEAN;
 begin
-    inherited Create( ASelectiveProcedure, AStatus );
+    inherited Create( ASelectiveProcedure, AStatus, AContext, AInMsg, AOutMsg );
 
     TextOk  := RoutineContext.ReadInputString( AStatus, TSplitWordsProcedure.INPUT_FIELD_TEXT, Text, TextNull );
 
@@ -182,18 +182,18 @@ end;{ TSplitFactory.newItem }
 function TSplitProcedure.open( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER ):IExternalResultSet;
 begin
     inherited open( AStatus, AContext, aInMsg, aOutMsg );
-    Result := TSplitResultSet.create( Self, AStatus );
+    Result := TSplitResultSet.create( Self, AStatus, AContext, AInMsg, AOutMsg );
 end;{ TSplitProcedure.open }
 
 { TSplitWordsResultSet }
 
-constructor TSplitResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus );
+constructor TSplitResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER );
 var
               Separator     : UnicodeString;
     TextNull, SeparatorNull : WORDBOOL;
     TextOk,   SeparatorOk   : BOOLEAN;
 begin
-    inherited Create( ASelectiveProcedure, AStatus );
+    inherited Create( ASelectiveProcedure, AStatus, AContext, AInMsg, AOutMsg );
 
     TextOk      := RoutineContext.ReadInputString( AStatus, TSplitProcedure.INPUT_FIELD_TEXT,      fText,     TextNull );
     SeparatorOk := RoutineContext.ReadInputString( AStatus, TSplitProcedure.INPUT_FIELD_SEPARATOR, Separator, SeparatorNull );

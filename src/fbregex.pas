@@ -74,7 +74,7 @@ TMatchesResultSet = class( TBwrResultSet )
     fMatch  : TMatch;
     fNumber : LONGINT;
   public
-    constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus ); override;
+    constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
     function fetch( AStatus:IStatus ):BOOLEAN; override;
 end;{ TMatchesResultSet }
 
@@ -103,7 +103,7 @@ TGroupsResultSet = class( TBwrResultSet )
     fNumber     : LONGINT;
     function GetNextGroup( out Start:LONGINT; out Finish:LONGINT ):BOOLEAN;
   public
-    constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus ); override;
+    constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
     function fetch( AStatus:IStatus ):BOOLEAN; override;
 end;{ TGroupsResultSet }
 
@@ -127,7 +127,7 @@ end;{ TMatchesFactory.newItem }
 function TMatchesProcedure.open( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER ):IExternalResultSet;
 begin
     inherited open( AStatus, AContext, aInMsg, aOutMsg );
-    Result := TMatchesResultSet.create( Self, AStatus );
+    Result := TMatchesResultSet.create( Self, AStatus, AContext, AInMsg, AOutMsg );
 end;{ TMatchesProcedure.open }
 
 { TMatchesResultSet }
@@ -156,13 +156,13 @@ begin
     end;
 end;{ CollateGroups }
 
-constructor TMatchesResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus );
+constructor TMatchesResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER );
 var
     Text,     Pattern     : UnicodeString;
     TextNull, PatternNull : WORDBOOL;
     TextOk,   PatternOk   : BOOLEAN;
 begin
-    inherited Create( ASelectiveProcedure, AStatus );
+    inherited Create( ASelectiveProcedure, AStatus, AContext, AInMsg, AOutMsg );
 
     TextOk    := RoutineContext.ReadInputString( AStatus, TMatchesProcedure.INPUT_FIELD_TEXT,    Text,    TextNull    );
     PatternOk := RoutineContext.ReadInputString( AStatus, TMatchesProcedure.INPUT_FIELD_PATTERN, Pattern, PatternNull );
@@ -211,16 +211,16 @@ end;{ TGroupsFactory.newItem }
 function TGroupsProcedure.open( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER ):IExternalResultSet;
 begin
     inherited open( AStatus, AContext, aInMsg, aOutMsg );
-    Result := TGroupsResultSet.create( self, AStatus );
+    Result := TGroupsResultSet.create( self, AStatus, AContext, AInMsg, AOutMsg );
 end;{ TGroupsProcedure.open }
 
 { TGroupsResultSet }
 
-constructor TGroupsResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus );
+constructor TGroupsResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER );
 var
     GroupsOk : BOOLEAN;
 begin
-    inherited Create( ASelectiveProcedure, AStatus );
+    inherited Create( ASelectiveProcedure, AStatus, AContext, AInMsg, AOutMsg );
 
     GroupsOk := RoutineContext.ReadInputString( AStatus, TGroupsProcedure.INPUT_FIELD_GROUPS, fGroups, fGroupsNull );
     fGroups  := Trim( fGroups );
