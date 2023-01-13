@@ -44,9 +44,9 @@ interface
 
 uses
     SysUtils
-  , firebird
-  , fbudr
   , RegularExpressions
+  , firebird     // https://github.com/shalamyansky/fb_common
+  , fbudr        // https://github.com/shalamyansky/fb_common
 ;
 
 
