@@ -170,7 +170,7 @@ _
       , part      string    -- part between separators
     );
 
-***split*** cuts ***text*** onto parts delimited by ***separator***. Since ***separator*** is not a simple string but regular exspression do not forget to escape special symbols if any. 
+***split*** cuts ***text*** onto parts delimited by ***separator***. Since ***separator*** is not a simple string but a regular exspression do not forget to escape special symbols if any. 
 
     text : 'Hamlet. To be or not to be? Not to ask!'
 
@@ -199,7 +199,7 @@ _
       , word      string    -- standalone word 
     );
 
-***split_words*** picks up standalone words. It treats any digit, english (latin) or russian cyrillic letter as a word symbol. It is equavalent ***find*** **( .., '[0-9A-Za-zА-Яа-яЁё]+', , )** except a bit faster. 
+***split_words*** picks up standalone words. It treats any digit, english (latin) or russian cyrillic letter as a word symbol. It is equivalent ***find*** **( .., '[0-9A-Za-zА-Яа-яЁё]+', , )** except a bit faster. 
 
     text : 'To be or not to be?'
 
