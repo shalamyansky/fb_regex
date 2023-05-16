@@ -227,7 +227,7 @@ Regular expression syntax is defined by PCRE 7.9.
 
 No limits for strings length and result set volume.
 
-Supports all the string types - char(), varchar() and blob sub_type text of any allowed length for this types.
+Supports all the string types - *char()*, *varchar()* and *blob sub_type text* of any allowed length for this types.
 
 Supports 2 character sets: UTF8 (1-4 bytes/symbol) and WIN1251 (1-byte russian cyrillic charset for Windows). 
 
@@ -251,4 +251,4 @@ Supports 2 character sets: UTF8 (1-4 bytes/symbol) and WIN1251 (1-byte russian c
 
 You can use binaries as you see fit.
 
-If you get code or part of code please keep my name and a link [here](https://github.com/shalamyansky/fb_regex).   
+If you get code or part of code please keep my name and a link to [here](https://github.com/shalamyansky/fb_regex).   
