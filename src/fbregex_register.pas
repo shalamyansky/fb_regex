@@ -186,13 +186,14 @@ implementation
 
 
 uses
-    fbregex
+    Windows
+  , fbregex
   , fbfind
   , fbsplit
 ;
 
 var
-    myUnloadFlag    : BOOLEAN;
+    myUnloadFlag    : BOOLEAN = FALSE;
     theirUnloadFlag : BooleanPtr;
 
 function firebird_udr_plugin( AStatus:IStatus; AUnloadFlagLocal:BooleanPtr; AUdrPlugin:IUdrPlugin ):BooleanPtr; cdecl;
@@ -217,8 +218,15 @@ end;{ InitalizationProc }
 
 procedure FinalizationProc;
 begin
-    if( ( theirUnloadFlag <> nil ) and ( not myUnloadFlag ) )then begin
-        theirUnloadFlag^ := TRUE;
+    try
+        if(
+              ( not myUnloadFlag )
+          and ( theirUnloadFlag <> nil )
+          and ( not IsBadWritePtr( theirUnloadFlag, SizeOf( theirUnloadFlag^ ) ) )
+        )then begin
+            theirUnloadFlag^ := TRUE;
+        end;
+    except
     end;
 end;{ FinalizationProc }
 

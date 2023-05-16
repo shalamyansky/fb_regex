@@ -7,6 +7,7 @@
     Project    : https://github.com/shalamyansky/fb_regex
     Company    : BWR
 *)
+
 library fb_regex;
 
 uses
