@@ -4,7 +4,7 @@ This is an extension library for RDBMS Firebird 3.0/4.0 to support regular expre
 ## Basis
 
 Library is implemented as а User Defined Routines (UDR) module of Firebird plugins architecture.
-Other side the DLL is compiled by Delphi XE3 and uses the RegularExpression unit, which itself wraps PCRE 7.9. Thus to understand possibilities fb_regex regular expressions see [PCRE documentation](http://pcre.org/).
+Other side the DLL is compiled by Delphi 12 and uses the RegularExpression unit, which itself wraps PCRE 8.45. Thus to understand possibilities fb_regex regular expressions see [PCRE documentation](http://pcre.org/).
 
 
 ## Routines
