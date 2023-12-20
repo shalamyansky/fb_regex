@@ -1,7 +1,7 @@
 (*
     Unit       : fbsplit
     Date       : 2022-11-09
-    Compiler   : Delphi XE3
+    Compiler   : Delphi XE3, Delphi 12
     ©Copyright : Shalamyansky Mikhail Arkadievich
     Contents   : Firebird UDR regular expressions based split functions
     Project    : https://github.com/shalamyansky/fb_regex

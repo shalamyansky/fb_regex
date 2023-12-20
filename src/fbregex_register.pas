@@ -1,7 +1,7 @@
 (*
     Unit       : fbregex_register
     Date       : 2022-11-09
-    Compiler   : Delphi XE3
+    Compiler   : Delphi XE3, Delphi 12
     ©Copyright : Shalamyansky Mikhail Arkadievich
     Contents   : Register UDR function for fb_regex project
     Project    : https://github.com/shalamyansky/fb_regex
