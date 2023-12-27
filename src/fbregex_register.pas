@@ -186,8 +186,10 @@ implementation
 
 
 uses
-    Windows
-  , fbregex
+    {$IFDEF MSWINDOWS}
+    Windows,
+    {$ENDIF}
+    fbregex
   , fbfind
   , fbsplit
 ;
@@ -222,7 +224,9 @@ begin
         if(
               ( not myUnloadFlag )
           and ( theirUnloadFlag <> nil )
-          and ( not IsBadWritePtr( theirUnloadFlag, SizeOf( theirUnloadFlag^ ) ) )
+          {$IFDEF MSWINDOWS}
+            and ( not IsBadWritePtr( theirUnloadFlag, SizeOf( theirUnloadFlag^ ) ) )
+          {$ENDIF}
         )then begin
             theirUnloadFlag^ := TRUE;
         end;
