@@ -8,6 +8,9 @@
     Company    : BWR
 *)
 
+{$DEFINE NO_FBCLIENT}
+{Define NO_FBCLIENT in your .dproj file to take effect on firebird.pas}
+
 library fb_regex;
 
 uses
