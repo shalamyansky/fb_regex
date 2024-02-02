@@ -81,8 +81,8 @@ TFindProcedure = class( TBwrSelectiveProcedure )
     INPUT_FIELD_SKIP    = 3;
     OUTPUT_FIELD_NUMBER = 0;
     OUTPUT_FIELD_FOUND  = 1;
-  public
-    function open( AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ):IExternalResultSet; override;
+  protected
+    class function GetBwrResultSetClass:TBwrResultSetClass; override;
 end;{ TFindProcedure }
 
 TFindResultSet = class( TBwrResultSet )
@@ -139,22 +139,23 @@ function Replace( Text:UnicodeString; Pattern:UnicodeString; Replacement:Unicode
 implementation
 
 
-{ TSplitWordsFactory }
+{ TFindProcedureFactory }
 
 function TFindFactory.newItem( AStatus:IStatus; AContext:IExternalContext; AMetadata:IRoutineMetadata ):IExternalProcedure;
 begin
     Result := TFindProcedure.create( AMetadata );
 end;{ TFindFactory.newItem }
 
+
 { TFindProcedure }
 
-function TFindProcedure.open( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER ):IExternalResultSet;
+class function TFindProcedure.GetBwrResultSetClass:TBwrResultSetClass;
 begin
-    inherited open( AStatus, AContext, aInMsg, aOutMsg );
-    Result := TFindResultSet.create( Self, AStatus, AContext, AInMsg, AOutMsg );
-end;{ TFindProcedure.open }
+    Result := TFindResultSet;
+end;{ TFindProcedure.GetBwrResultSetClass }
 
-{ TSplitWordsResultSet }
+
+{ TFindResultSet }
 
 constructor TFindResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER );
 var
@@ -224,6 +225,7 @@ begin
     Result := TFindFirstFunction.create( AMetadata );
 end;{ TFindFirstFactory.newItem }
 
+
 { TFindFirstFunction }
 
 procedure TFindFirstFunction.execute( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER );
@@ -278,12 +280,14 @@ begin
     end;
 end;{ FindFirst }
 
+
 { TReplaceFactory }
 
 function TReplaceFactory.newItem( AStatus:IStatus; AContext:IExternalContext; AMetadata:IRoutineMetadata ):IExternalFunction;
 begin
     Result := TReplaceFunction.create( AMetadata );
 end;{ TReplaceFactory.newItem }
+
 
 { TReplaceFunction }
 

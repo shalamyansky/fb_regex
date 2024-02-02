@@ -14,6 +14,11 @@
 library fb_regex;
 
 uses
+  {$IFDEF FastMM}
+    {$DEFINE ClearLogFileOnStartup}
+    {$DEFINE EnableMemoryLeakReporting}
+    FastMM5,
+  {$ENDIF}
     fbregex_register
 ;
 

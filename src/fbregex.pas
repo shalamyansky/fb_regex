@@ -65,8 +65,8 @@ TMatchesProcedure = class( TBwrSelectiveProcedure )
     INPUT_FIELD_PATTERN = 1;
     OUTPUT_FIELD_NUMBER = 0;
     OUTPUT_FIELD_GROUPS = 1;
-  public
-    function open( AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ):IExternalResultSet; override;
+  protected
+    class function GetBwrResultSetClass:TBwrResultSetClass; override;
 end;{ TMatchesProcedure }
 
 TMatchesResultSet = class( TBwrResultSet )
@@ -91,8 +91,8 @@ TGroupsProcedure = class( TBwrSelectiveProcedure )
     OUTPUT_FIELD_NUMBER = 0;
     OUTPUT_FIELD_START  = 1;
     OUTPUT_FIELD_FINISH = 2;
-  public
-    function open( AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ):IExternalResultSet; override;
+  protected
+    class function GetBwrResultSetClass:TBwrResultSetClass; override;
 end;{ TGroupsProcedure }
 
 TGroupsResultSet = class( TBwrResultSet )
@@ -124,11 +124,11 @@ end;{ TMatchesFactory.newItem }
 
 { TMatchesProcedure }
 
-function TMatchesProcedure.open( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER ):IExternalResultSet;
+class function TMatchesProcedure.GetBwrResultSetClass:TBwrResultSetClass;
 begin
-    inherited open( AStatus, AContext, aInMsg, aOutMsg );
-    Result := TMatchesResultSet.create( Self, AStatus, AContext, AInMsg, AOutMsg );
-end;{ TMatchesProcedure.open }
+    Result := TMatchesResultSet;
+end;{ TMatchesProcedure.GetBwrResultSetClass }
+
 
 { TMatchesResultSet }
 
@@ -206,13 +206,14 @@ begin
     Result := TGroupsProcedure.create( AMetadata );
 end;{ TGroupsFactory.newItem }
 
+
 { TGroupsProcedure }
 
-function TGroupsProcedure.open( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER ):IExternalResultSet;
+class function TGroupsProcedure.GetBwrResultSetClass:TBwrResultSetClass;
 begin
-    inherited open( AStatus, AContext, aInMsg, aOutMsg );
-    Result := TGroupsResultSet.create( self, AStatus, AContext, AInMsg, AOutMsg );
-end;{ TGroupsProcedure.open }
+    Result := TGroupsResultSet;
+end;{ TGroupsProcedure.GetBwrResultSetClass }
+
 
 { TGroupsResultSet }
 

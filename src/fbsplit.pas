@@ -63,8 +63,8 @@ TSplitWordsProcedure = class( TBwrSelectiveProcedure )
     INPUT_FIELD_TEXT    = 0;
     OUTPUT_FIELD_NUMBER = 0;
     OUTPUT_FIELD_WORD   = 1;
-  public
-    function open( AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ):IExternalResultSet; override;
+  protected
+    class function GetBwrResultSetClass:TBwrResultSetClass; override;
 end;{ TSplitWordsProcedure }
 
 TSplitWordsResultSet = class( TBwrResultSet )
@@ -88,8 +88,8 @@ TSplitProcedure = class( TBwrSelectiveProcedure )
     INPUT_FIELD_SEPARATOR = 1;
     OUTPUT_FIELD_NUMBER   = 0;
     OUTPUT_FIELD_PART     = 1;
-  public
-    function open( AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ):IExternalResultSet; override;
+  protected
+    class function GetBwrResultSetClass:TBwrResultSetClass; override;
 end;{ TSplitProcedure }
 
 TSplitResultSet = class( TBwrResultSet )
@@ -120,13 +120,14 @@ begin
     Result := TSplitWordsProcedure.create( AMetadata );
 end;{ TSplitWordsFactory.newItem }
 
+
 { TSplitWordsProcedure }
 
-function TSplitWordsProcedure.open( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER ):IExternalResultSet;
+class function TSplitWordsProcedure.GetBwrResultSetClass:TBwrResultSetClass;
 begin
-    inherited open( AStatus, AContext, aInMsg, aOutMsg );
-    Result := TSplitWordsResultSet.create( Self, AStatus, AContext, AInMsg, AOutMsg );
-end;{ TSplitWordsProcedure.open }
+    Result := TSplitWordsResultSet;
+end;{ TSplitWordsProcedure.GetBwrResultSetClass }
+
 
 { TSplitWordsResultSet }
 
@@ -170,6 +171,7 @@ begin
     WordOk   := RoutineContext.WriteOutputString(  AStatus, TSplitWordsProcedure.OUTPUT_FIELD_WORD,   Word,    WordNull   );
 end;{ TSplitWordsResultSet.fetch }
 
+
 { TSplitFactory }
 
 function TSplitFactory.newItem( AStatus:IStatus; AContext:IExternalContext; AMetadata:IRoutineMetadata ):IExternalProcedure;
@@ -177,13 +179,14 @@ begin
     Result := TSplitProcedure.create( AMetadata );
 end;{ TSplitFactory.newItem }
 
+
 { TSplitProcedure }
 
-function TSplitProcedure.open( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER ):IExternalResultSet;
+class function TSplitProcedure.GetBwrResultSetClass:TBwrResultSetClass;
 begin
-    inherited open( AStatus, AContext, aInMsg, aOutMsg );
-    Result := TSplitResultSet.create( Self, AStatus, AContext, AInMsg, AOutMsg );
-end;{ TSplitProcedure.open }
+    Result := TSplitResultSet;
+end;{ TSplitProcedure.GetBwrResultSetClass }
+
 
 { TSplitWordsResultSet }
 
@@ -242,6 +245,7 @@ begin
     PartOk   := RoutineContext.WriteOutputString(  AStatus, TSplitProcedure.OUTPUT_FIELD_PART,   Part,    PartNull   );
 end;{ TMatchesResultSet.fetch }
 
+
 procedure InitalizationProc;
 begin
     prnWord := TRegEx.Create( regWord, [ roCompiled ] );
@@ -251,7 +255,6 @@ initialization
 begin
     InitalizationProc;
 end;
-
 
 
 end.
