@@ -11,6 +11,11 @@
 {$DEFINE NO_FBCLIENT}
 {Define NO_FBCLIENT in your .dproj file to take effect on firebird.pas}
 
+(* Changes:
+ 2025-01-29 ver. 2.1.4.0
+ - Blobs are created as stream and temporary ones;
+*)
+
 library fb_regex;
 
 uses
