@@ -160,6 +160,23 @@ _
         ==========
         x = position (substring,text); y = position(b,a);
 
+-
+
+    text : 'x = run( value ); y = run();'
+
+    task : Change 'run' function to 'launch'. If function has no parameters set default one.   
+
+    solution:
+        select
+            regex.replace( :text, 'run\(\s*?(\S.*?)?\s*?\)', 'launch( ${1:+$1:default} )', null,  null )
+          from
+            rdb$database
+
+     result:    
+        REPLACE
+        ==========
+        x = launch( value ); y = launch( default );
+
 ## procedure *split*
 
     procedure split(
@@ -223,7 +240,7 @@ _
 
 ## Limitations
 
-Regular expression syntax is defined by PCRE 8.45.
+Regular expression syntax is defined by PCRE 8.45. The conditional replacement syntax extension from PCRE2 is also implemented as described [here](https://www.regular-expressions.info/replaceconditional.html). 
 
 No limits for strings length and result set volume.
 

@@ -37,19 +37,6 @@ engine
     udr
 ^
 
-create or alter function replace(
-    text        varchar(8191) character set UTF8
-  , pattern     varchar(8191) character set UTF8
-  , replacement varchar(8191) character set UTF8
-  , amount      integer
-  , pass        integer
-)returns        varchar(8191) character set UTF8
-external name
-    'fb_regex!replace'
-engine
-    udr
-^
-
 set term ;^
 *)
 
@@ -113,27 +100,8 @@ TFindFirstFunction = class( TBwrFunction )
     procedure execute( AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
 end;{ TFindFirstFunction }
 
-{ replace }
-
-TReplaceFactory = class( TBwrFunctionFactory )
-  public
-    function newItem( AStatus:IStatus; AContext:IExternalContext; AMetadata:IRoutineMetadata ):IExternalFunction; override;
-end;{ TReplaceFactory }
-
-TReplaceFunction = class( TBwrFunction )
-  const
-    INPUT_FIELD_TEXT        = 0;
-    INPUT_FIELD_PATTERN     = 1;
-    INPUT_FIELD_REPLACEMENT = 2;
-    INPUT_FIELD_AMOUNT      = 3;
-    INPUT_FIELD_SKIP        = 4;
-    OUTPUT_FIELD_RESULT     = 0;
-  public
-    procedure execute( AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
-end;{ TReplaceFunction }
 
 function FindFirst( Text:UnicodeString; Pattern:UnicodeString; Skip:LONGINT = 0 ):UnicodeString; overload;
-function Replace( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
 
 
 implementation
@@ -280,84 +248,5 @@ begin
     end;
 end;{ FindFirst }
 
-
-{ TReplaceFactory }
-
-function TReplaceFactory.newItem( AStatus:IStatus; AContext:IExternalContext; AMetadata:IRoutineMetadata ):IExternalFunction;
-begin
-    Result := TReplaceFunction.create( AMetadata );
-end;{ TReplaceFactory.newItem }
-
-
-{ TReplaceFunction }
-
-procedure TReplaceFunction.execute( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER );
-var
-    Text, Pattern, Replacement, Result : UnicodeString;
-    Amount, Skip : LONGINT;
-    TextNull, PatternNull, ReplacementNull, AmountNull, SkipNull, ResultNull : WORDBOOL;
-    TextOk,   PatternOk,   ReplacementOk,   AmountOk,   SkipOk,   ResultOk   : BOOLEAN;
-begin
-    inherited execute( AStatus, AContext, aInMsg, aOutMsg );
-    System.Finalize( Result );
-    ResultNull := TRUE;
-    ResultOk   := FALSE;
-
-    TextOk        := RoutineContext.ReadInputString(  AStatus, TReplaceFunction.INPUT_FIELD_TEXT,        Text,        TextNull        );
-    PatternOk     := RoutineContext.ReadInputString(  AStatus, TReplaceFunction.INPUT_FIELD_PATTERN,     Pattern,     PatternNull     );
-    ReplacementOk := RoutineContext.ReadInputString(  AStatus, TReplaceFunction.INPUT_FIELD_REPLACEMENT, Replacement, ReplacementNull );
-    AmountOk      := RoutineContext.ReadInputLongint( AStatus, TReplaceFunction.INPUT_FIELD_AMOUNT,      Amount,      AmountNull      );
-    SkipOk        := RoutineContext.ReadInputLongint( AStatus, TReplaceFunction.INPUT_FIELD_SKIP,        Skip,        SkipNull        );
-
-    if( AmountNull or ( Amount < 0 ) )then begin
-        Amount := $7FFFFFFF;
-    end;
-    if( SkipNull or ( Skip < 0 ) )then begin
-        Skip := 0;
-    end;
-
-    ResultNull := TextNull or PatternNull or ReplacementNull;
-    if( not ResultNull )then begin
-        Result := Replace( Text, Pattern, Replacement, Amount, Skip );
-    end;
-
-    ResultOk := RoutineContext.WriteOutputString( AStatus, TReplaceFunction.OUTPUT_FIELD_RESULT, Result, ResultNull );
-end;{ TReplaceFunction.execute }
-
-function Replace( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
-var
-    RegEx : TRegEx;
-    Match : TMatch;
-    Start : LONGINT;
-    Head , Tail : UnicodeString;
-begin
-    Result := Text;
-    if( ( Length( Text ) = 0 ) or ( Length( Pattern ) = 0 ) )then begin
-        exit;
-    end;
-    if( Amount < 0 )then begin
-        Amount := $7FFFFFFF;
-    end;
-    if( Skip < 0 )then begin
-        Skip := 0;
-    end;
-    RegEx := TRegEx.Create( Pattern, [ roCompiled ] );
-    if( Skip = 0 )then begin
-        Result := RegEx.Replace( Text, Replacement, Amount );
-    end else begin
-        Match := RegEx.Match( Text );
-        Dec( Skip );
-        while( ( Skip > 0 ) and Match.Success )do begin
-            Match := Match.NextMatch;
-            Dec( Skip );
-        end;
-        if( Match.Success )then begin
-            Start  := Match.Index + Match.Length;
-            Head   := Copy( Text, 1, Start - 1 );
-            Tail   := Copy( Text, Start );
-            Result := Head + RegEx.Replace( Tail, Replacement, Amount );
-        end;
-    end;
-end;{ Replace }
 
 end.

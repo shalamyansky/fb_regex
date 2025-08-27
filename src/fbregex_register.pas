@@ -192,6 +192,7 @@ uses
     fbregex
   , fbfind
   , fbsplit
+  , fbreplace
 ;
 
 var
@@ -204,7 +205,7 @@ begin
     AUdrPlugin.registerProcedure( AStatus, 'groups',      fbregex.TGroupsFactory.Create()     );
     AUdrPlugin.registerProcedure( AStatus, 'find',        fbfind.TFindFactory.Create()        );
     AUdrPlugin.registerFunction(  AStatus, 'find_first',  fbfind.TFindFirstFactory.Create()   );
-    AUdrPlugin.registerFunction(  AStatus, 'replace',     fbfind.TReplaceFactory.Create()     );
+    AUdrPlugin.registerFunction(  AStatus, 'replace',     fbreplace.TReplaceFactory.Create()  );
     AUdrPlugin.registerProcedure( AStatus, 'split_words', fbsplit.TSplitWordsFactory.Create() );
     AUdrPlugin.registerProcedure( AStatus, 'split',       fbsplit.TSplitFactory.Create()      );
 
