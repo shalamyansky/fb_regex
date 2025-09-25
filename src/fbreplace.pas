@@ -168,14 +168,22 @@ TCondition = class
     Absent   : UnicodeString;
     AbsConds : TConditions;
   public
-    constructor Create;
-    destructor  Destroy;
+    constructor Create; overload;
+    constructor Create( Start, Length, GroupNo : LONGINT ); overload;
+    destructor  Destroy; override;
 end;{ TCondition }
 
 constructor TCondition.Create;
 begin
     inherited Create;
     GroupNo := -1;
+end;{ TCondition.Create }
+
+constructor TCondition.Create( Start, Length, GroupNo : LONGINT );
+begin
+    Self.Start   := Start;
+    Self.Length  := Length;
+    Self.GroupNo := GroupNo;
 end;{ TCondition.Create }
 
 procedure FreeConditions( var Conditions:TConditions );
@@ -204,6 +212,8 @@ begin
     Arr[ L ] := Value;
 end;{ ArrayAppend }
 
+
+function PrepareConditions( Replacement:UnicodeString ):TConditions;
 const
     cndPattern = '\$(\{(?:(\d{1,2}):([+-]))?((?:(?1)|.)*?)(?::((?:(?1)|.)*?))?\})';
     grpNumber  = 2;
@@ -211,28 +221,25 @@ const
     grpPresent = 4;
     grpAbsent  = 5;
 var
-    cndRegEx : TRegEx;
-
-function PrepareConditions( Replacement:UnicodeString ):TConditions;
-var
+    cndRegEx  : TRegEx;
     Condition : TCondition;
+    GroupNo   : LONGINT;
     Match     : TMatch;
     Sign      : UnicodeString;
     Reverse   : BOOLEAN;
 begin
     System.Finalize( Result );
-
-    Match := cndRegEx.Match( Replacement );
+    cndRegEx := TRegEx.Create( cndPattern, [ roCompiled ] );
+    Match    := cndRegEx.Match( Replacement );
     while( Match.Success )do begin
 
-        Condition := TCondition.Create;
-        Condition.Start   := Match.Index;
-        Condition.Length  := Match.Length;
+        GroupNo := -1;
         if( ( grpNumber < Match.Groups.Count ) and Match.Groups.Item[ grpNumber ].Success )then begin
-            Condition.GroupNo := StrToIntDef(      Match.Groups.Item[ grpNumber ].Value, -1 );
+            GroupNo := StrToIntDef(                Match.Groups.Item[ grpNumber ].Value, -1 );
         end;
-        if( Condition.GroupNo >= 0 )then begin
-            Reverse := FALSE;
+        if( GroupNo >= 0 )then begin
+            Condition := TCondition.Create( Match.Index, Match.Length, GroupNo );
+            Reverse   := FALSE;
             if( ( grpSign < Match.Groups.Count ) and Match.Groups.Item[ grpSign ].Success )then begin
                 Reverse := SameStr(                  Match.Groups.Item[ grpSign ].Value, '-' );
             end;
@@ -252,12 +259,11 @@ begin
             Condition.AbsConds := PrepareConditions( Condition.Absent  );
 
             ArrayAppend( Condition, Result );
-        end else begin
-            FreeAndNil( Condition );
         end;
 
         Match := Match.NextMatch;
     end;
+    System.Finalize( cndRegEx );
 end;{ PrepareConditions }
 
 function MakeMatchReplacement( Match:TMatch; Replacement:UnicodeString; Conditions:TConditions ):UnicodeString;
@@ -275,6 +281,7 @@ begin
           , IfThen(
               (
                     ( Condition.GroupNo < Match.Groups.Count )
+                and Match.Groups.Item[ Condition.GroupNo ].Success
                 and ( 0 < Length( Match.Groups.Item[ Condition.GroupNo ].Value ) )
               )
             , MakeMatchReplacement( Match, Condition.Present, Condition.PreConds )
@@ -316,14 +323,20 @@ begin
             Builder  := TStringBuilder.Create( 16384 );
             Pos      := 0;
             Match    := RegEx.Match( Text );
-            while( Match.Success )do begin
-                MatchReplacement := MakeMatchReplacement( Match, Replacement, Conditions );
-                MatchReplaced    := RegExRep.Replace( Match.Value, MatchReplacement );
-                //StringBuilder.Append( , Pos ) suddenly adds low(string)=1 to Pos (?!)
-                Builder
-                    .Append( Text, Pos, Match.Index - 1 - Pos )
-                    .Append( MatchReplaced )
-                ;
+            while( ( Amount > 0 ) and Match.Success )do begin
+                if( Skip = 0 )then begin
+                    MatchReplacement := MakeMatchReplacement( Match, Replacement, Conditions );
+                    MatchReplaced    := RegExRep.Replace( Match.Value, MatchReplacement );
+                    //StringBuilder.Append( , Pos ) suddenly adds low(string)=1 to Pos (?!)
+                    Builder
+                        .Append( Text, Pos, Match.Index - 1 - Pos )
+                        .Append( MatchReplaced )
+                    ;
+                    Dec( Amount );
+                end else begin
+                    Builder.Append( Text, Pos, Match.Index + Match.Length - 1 - Pos );
+                    Dec( Skip );
+                end;
                 Pos   := Match.Index + Match.Length - 1;
                 Match := Match.NextMatch;
             end;
@@ -336,14 +349,5 @@ begin
     end;
 end;{ ReplaceEx }
 
-procedure Init;
-begin
-    cndRegEx := TRegEx.Create( cndPattern, [ roCompiled ] );
-end;{ Init }
-
-initialization
-begin
-    Init;
-end;{ initialization }
 
 end.

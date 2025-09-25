@@ -1,10 +1,10 @@
 # fb_regex
-This is an extension library for RDBMS Firebird 3.0/4.0 to support regular expressions in SQL.
+This is an extension library for RDBMS Firebird (>=3.0) to support regular expressions in SQL.
 
 ## Basis
 
 Library is implemented as а User Defined Routines (UDR) module of Firebird plugins architecture.
-Other side the DLL is compiled by Delphi 12 and uses the RegularExpression unit, which itself wraps PCRE 8.45. Thus to understand possibilities fb_regex regular expressions see [PCRE documentation](http://pcre.org/).
+Other side the DLL is compiled by Delphi 12 and uses the RegularExpression unit, which itself wraps PCRE 8.45. Thus to understand possibilities fb_regex regular expressions see [PCRE documentation](http://pcre.org/). In addition to PCRE 8.45, the conditional replacement syntax from PCRE2 is also implemented, as described [here](https://www.regular-expressions.info/replaceconditional.html#pcre2).
 
 
 ## Routines
@@ -127,7 +127,7 @@ This is selective procedure, each row is one group. The procedure just parses st
       , pass        integer   -- amount to skip first matches
     )returns        string;   -- updated text
 
-Function ***replace*** seeks matches in ***text*** and replaces its with ***replacement***. Supports **$n** syntax in ***replacement***, where **n** is a ***pattern*** group number.  
+Function ***replace*** seeks matches in ***text*** and replaces its with ***replacement***. Supports **$n** syntax in ***replacement***, where **n** is a ***pattern*** group number. Supports conditional replacement expressions. 
 
     text : 'x = position (text,substring); y = position(a,b);'
 
@@ -240,7 +240,7 @@ _
 
 ## Limitations
 
-Regular expression syntax is defined by PCRE 8.45. The conditional replacement syntax extension from PCRE2 is also implemented as described [here](https://www.regular-expressions.info/replaceconditional.html). 
+Regular expression syntax is defined by PCRE 8.45. 
 
 No limits for strings length and result set volume.
 
@@ -255,7 +255,7 @@ Supports 2 character sets: **UTF8** (1-4 bytes/symbol) and **WIN1251** (1-byte r
 0. Download a release package.
 
 1. Copy fb_regex.dll to %firebird%\plugins\udr
-   where %firebird% is Firebird 4(3) server root directory.
+   where %firebird% is Firebird (>=3.0) server root directory.
    Make sure library module matches the Firebird bitness.
 
 2. Look at script in fb_regex_utf8.sql. You can change all or some varchar() parameters to any length char, varchar
