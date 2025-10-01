@@ -78,8 +78,10 @@ TFindResultSet = class( TBwrResultSet )
     fAmount : LONGINT;
     fMatch  : TMatch;
     fNumber : LONGINT;
+    fRegEx  : TRegEx;
   public
     constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
+    destructor  Destroy; override;
     function fetch( AStatus:IStatus ):BOOLEAN; override;
 end;{ TFindResultSet }
 
@@ -146,7 +148,8 @@ begin
     end;
     fStop := TextNull or ( Length( Text ) = 0 ) or PatternNull or ( Length( Pattern ) = 0 ) or ( fAmount = 0 );
     if( not fStop )then begin
-        fMatch  := TRegEx.Create( Pattern, [ roCompiled ] ).Match( Text );
+        fRegEx  := TRegEx.Create( Pattern, [ roCompiled ] );
+        fMatch  := fRegEx.Match( Text );
         while( ( Skip > 0 ) and fMatch.Success )do begin
             Dec( Skip );
             fMatch := fMatch.NextMatch;
@@ -155,6 +158,12 @@ begin
         fNumber := 0;
     end;
 end;{ TFindResultSet.Create }
+
+destructor TFindResultSet.Destroy;
+begin
+    System.Finalize( fRegEx );
+    inherited Destroy;
+end;{ TFindResultSet.Destroy }
 
 function TFindResultSet.fetch( AStatus:IStatus ):BOOLEAN;
 var
@@ -230,6 +239,7 @@ var
     Match : TMatch;
     Start : LONGINT;
     Head , Tail : UnicodeString;
+    RegEx : TRegEx;
 begin
     Result := '';
     if( ( Length( Text ) = 0 ) or ( Length( Pattern ) = 0 ) )then begin
@@ -238,7 +248,8 @@ begin
     if( Skip < 0 )then begin
         Skip := 0;
     end;
-    Match := TRegEx.Create( Pattern, [ roCompiled ] ).Match( Text );
+    RegEx := TRegEx.Create( Pattern, [ roCompiled ] );
+    Match := RegEx.Match( Text );
     while( ( Skip > 0 ) and ( Match.Success ) )do begin
         Dec( Skip );
         Match := Match.NextMatch;
@@ -246,6 +257,7 @@ begin
     if( Match.Success )then begin
         Result := Match.Value;
     end;
+    System.Finalize( RegEx );
 end;{ FindFirst }
 
 

@@ -148,6 +148,7 @@ begin
             Result := Head + RegEx.Replace( Tail, Replacement, Amount );
         end;
     end;
+    System.Finalize( RegEx );
 end;{ Replace }
 
 { ReplaceEx }
@@ -211,7 +212,6 @@ begin
     SetLength( Arr, Succ( L ) );
     Arr[ L ] := Value;
 end;{ ArrayAppend }
-
 
 function PrepareConditions( Replacement:UnicodeString ):TConditions;
 const
@@ -342,6 +342,9 @@ begin
             end;
             Builder.Append( Text, Pos );
             Result := Builder.ToString;
+
+            System.Finalize( RegEx );
+            System.Finalize( RegExRep );
         end;
     finally
         FreeAndNil( Builder );

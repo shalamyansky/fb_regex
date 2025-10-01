@@ -123,23 +123,23 @@
         <DCC_DcuOutput>..\dcu\win32</DCC_DcuOutput>
         <DCC_ExeOutput>..\bin\win32</DCC_ExeOutput>
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
-        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.1.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (32-bit);ProductVersion=3.1.1.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.2.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (32-bit);ProductVersion=3.1.2.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <VerInfo_MajorVer>3</VerInfo_MajorVer>
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <VerInfo_DLL>true</VerInfo_DLL>
-        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Release>2</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <DCC_DcuOutput>..\dcu\win64</DCC_DcuOutput>
         <DCC_ExeOutput>..\bin\win64</DCC_ExeOutput>
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
-        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.1.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (64-bit);ProductVersion=3.1.1.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.2.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (64-bit);ProductVersion=3.1.2.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <VerInfo_MajorVer>3</VerInfo_MajorVer>
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <VerInfo_DLL>true</VerInfo_DLL>
-        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Release>2</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_DebugDCUs>false</DCC_DebugDCUs>
@@ -152,18 +152,18 @@
         <Debugger_Launcher>/usr/bin/gnome-terminal -- &quot;%debuggee%&quot;</Debugger_Launcher>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.1.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (32-bit);ProductVersion=3.1.1.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.2.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (32-bit);ProductVersion=3.1.2.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
         <VerInfo_MajorVer>3</VerInfo_MajorVer>
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <VerInfo_DLL>true</VerInfo_DLL>
-        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Release>2</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
-        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.1.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (64-bit);ProductVersion=3.1.1.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.2.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (64-bit);ProductVersion=3.1.2.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
         <VerInfo_MajorVer>3</VerInfo_MajorVer>
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <VerInfo_DLL>true</VerInfo_DLL>
-        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Release>2</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <VerInfo_Keys>CompanyName=BWR;FileDescription=;FileVersion=1.29.0.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2023;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=Firebird UDR library for regular expressions (Debug);ProductVersion=1.29.0.0;Comments=;CFBundleName=;CFBundleDisplayName=;CFBundleIdentifier=;CFBundleVersion=;CFBundlePackageType=;CFBundleSignature=;CFBundleAllowMixedLocalizations=;CFBundleExecutable=</VerInfo_Keys>
@@ -176,19 +176,19 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <DCC_MapFile>3</DCC_MapFile>
-        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.1.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (32-bit, debug);ProductVersion=3.1.1.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.2.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (32-bit, debug);ProductVersion=3.1.2.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
         <VerInfo_MajorVer>3</VerInfo_MajorVer>
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_DLL>true</VerInfo_DLL>
-        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Release>2</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <DCC_MapFile>3</DCC_MapFile>
         <Debugger_RunParams>-a</Debugger_RunParams>
         <Debugger_HostApplication>C:\Program Files\Firebird50\firebird.exe</Debugger_HostApplication>
         <DCC_ExeOutput>C:\Program Files\Firebird50\plugins\udr\</DCC_ExeOutput>
-        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.1.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (64-bit, debug);ProductVersion=3.1.1.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=BWR;FileVersion=3.1.2.0;InternalName=;LegalCopyright=Shalamyansky M.A. (c) 2022-2025;LegalTrademarks=;OriginalFilename=fb_regex.dll;ProductName=fb_regex (64-bit, debug);ProductVersion=3.1.2.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=RegEx support Firebird UDR module</VerInfo_Keys>
         <VerInfo_MajorVer>3</VerInfo_MajorVer>
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <VerInfo_Debug>true</VerInfo_Debug>
@@ -197,7 +197,7 @@
         <DCC_Define>FastMM;$(DCC_Define)</DCC_Define>
         <Debugger_IncludeSystemVars>true</Debugger_IncludeSystemVars>
         <Debugger_EnvVars>FIREBIRD_LOCK=C:\ProgramData\firebird\40\lock;$(Debugger_EnvVars)</Debugger_EnvVars>
-        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Release>2</VerInfo_Release>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">

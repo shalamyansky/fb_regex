@@ -71,8 +71,10 @@ TSplitWordsResultSet = class( TBwrResultSet )
   private
     fMatch  : TMatch;
     fNumber : LONGINT;
+    fRegEx  : TRegEx;
   public
     constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
+    destructor  Destroy; override;
     function fetch( AStatus:IStatus ):BOOLEAN; override;
 end;{ TSplitsWordResultSet }
 
@@ -99,19 +101,16 @@ TSplitResultSet = class( TBwrResultSet )
     fPrev   : LONGINT;
     fMatch  : TMatch;
     fNumber : LONGINT;
+    fRegEx  : TRegEx;
   public
     constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
+    destructor  Destroy; override;
     function fetch( AStatus:IStatus ):BOOLEAN; override;
 end;{ TSplitsWordResultSet }
 
 
 implementation
 
-
-const
-    regWord : UnicodeString = '[0-9A-Za-zÀ-ßà-ÿ¨¸]+';
-var
-    prnWord : TRegEx;
 
 { TSplitWordsFactory }
 
@@ -132,6 +131,8 @@ end;{ TSplitWordsProcedure.GetBwrResultSetClass }
 { TSplitWordsResultSet }
 
 constructor TSplitWordsResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER );
+const
+    regWord = '[_0-9A-Za-zÀ-ßà-ÿ¨¸]+';
 var
     Text     : UnicodeString;
     TextNull : WORDBOOL;
@@ -141,9 +142,16 @@ begin
 
     TextOk  := RoutineContext.ReadInputString( AStatus, TSplitWordsProcedure.INPUT_FIELD_TEXT, Text, TextNull );
 
-    fMatch  := prnWord.Match( Text );
+    fRegEx  := TRegEx.Create( regWord, [ roCompiled ] );
+    fMatch  := fRegEx.Match( Text );
     fNumber := 0;
 end;{ TSplitWordsResultSet.Create }
+
+destructor TSplitWordsResultSet.Destroy;
+begin
+    System.Finalize( fRegEx );
+    inherited Destroy;
+end;{ TSplitWordsResultSet.Destroy }
 
 function TSplitWordsResultSet.fetch( AStatus:IStatus ):BOOLEAN;
 var
@@ -204,10 +212,17 @@ begin
     fStop := TextNull or ( Length( fText ) = 0 ) or SeparatorNull or ( Length( Separator ) = 0 );
     if( not fStop )then begin
         fPrev   := 1;
-        fMatch  := TRegEx.Create( Separator, [ roCompiled ] ).Match( fText );
+        fRegEx  := TRegEx.Create( Separator, [ roCompiled ] );
+        fMatch  := fRegEx.Match( fText );
         fNumber := 0;
     end;
 end;{ TSplitResultSet.Create }
+
+destructor TSplitResultSet.Destroy;
+begin
+    System.Finalize( fRegEx );
+    inherited Destroy;
+end;{ TSplitResultSet.Destroy }
 
 function TSplitResultSet.fetch( AStatus:IStatus ):BOOLEAN;
 var
@@ -244,17 +259,6 @@ begin
     NumberOk := RoutineContext.WriteOutputLongint( AStatus, TSplitProcedure.OUTPUT_FIELD_NUMBER, fNumber, NumberNull );
     PartOk   := RoutineContext.WriteOutputString(  AStatus, TSplitProcedure.OUTPUT_FIELD_PART,   Part,    PartNull   );
 end;{ TMatchesResultSet.fetch }
-
-
-procedure InitalizationProc;
-begin
-    prnWord := TRegEx.Create( regWord, [ roCompiled ] );
-end;{ InitalizationProc }
-
-initialization
-begin
-    InitalizationProc;
-end;
 
 
 end.

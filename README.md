@@ -108,7 +108,7 @@ This is selective procedure, each row is one group. The procedure just parses st
 
     solution:
         select
-            regex.find_first( :text, '(?i)to\s+(\w+)', null )
+            regex.find_first( :text, '(?i)not to\s+(\w+)', null )
           from
             rdb$database
 
@@ -226,7 +226,7 @@ _
         select
             *
           from
-            regex.split_words( text )
+            regex.split_words( :text )
 
      result:    
           NUMBER SPLIT_WORDS

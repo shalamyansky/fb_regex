@@ -73,8 +73,10 @@ TMatchesResultSet = class( TBwrResultSet )
   private
     fMatch  : TMatch;
     fNumber : LONGINT;
+    fRegEx  : TRegEx;
   public
     constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
+    destructor  Destroy; override;
     function fetch( AStatus:IStatus ):BOOLEAN; override;
 end;{ TMatchesResultSet }
 
@@ -167,9 +169,16 @@ begin
     TextOk    := RoutineContext.ReadInputString( AStatus, TMatchesProcedure.INPUT_FIELD_TEXT,    Text,    TextNull    );
     PatternOk := RoutineContext.ReadInputString( AStatus, TMatchesProcedure.INPUT_FIELD_PATTERN, Pattern, PatternNull );
 
-    fMatch  := TRegEx.Create( Pattern, [ roCompiled ] ).Match( Text );
+    fRegEx  := TRegEx.Create( Pattern, [ roCompiled ] );
+    fMatch  := fRegEx.Match( Text );
     fNumber := 0;
 end;{ TMatchesResultSet.Create }
+
+destructor TMatchesResultSet.Destroy;
+begin
+    System.Finalize( fRegEx );
+    inherited Destroy;
+end;{ TMatchesResultSet.Destroy }
 
 function TMatchesResultSet.fetch( AStatus:IStatus ):BOOLEAN;
 var
