@@ -149,6 +149,7 @@ end;{ TSplitWordsResultSet.Create }
 
 destructor TSplitWordsResultSet.Destroy;
 begin
+    System.Finalize( fMatch );
     System.Finalize( fRegEx );
     inherited Destroy;
 end;{ TSplitWordsResultSet.Destroy }
@@ -220,6 +221,7 @@ end;{ TSplitResultSet.Create }
 
 destructor TSplitResultSet.Destroy;
 begin
+    System.Finalize( fMatch );
     System.Finalize( fRegEx );
     inherited Destroy;
 end;{ TSplitResultSet.Destroy }

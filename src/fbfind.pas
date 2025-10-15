@@ -161,6 +161,7 @@ end;{ TFindResultSet.Create }
 
 destructor TFindResultSet.Destroy;
 begin
+    System.Finalize( fMatch );
     System.Finalize( fRegEx );
     inherited Destroy;
 end;{ TFindResultSet.Destroy }

@@ -148,6 +148,7 @@ begin
             Result := Head + RegEx.Replace( Tail, Replacement, Amount );
         end;
     end;
+    System.Finalize( Match );
     System.Finalize( RegEx );
 end;{ Replace }
 
@@ -343,6 +344,7 @@ begin
             Builder.Append( Text, Pos );
             Result := Builder.ToString;
 
+            System.Finalize( Match );
             System.Finalize( RegEx );
             System.Finalize( RegExRep );
         end;

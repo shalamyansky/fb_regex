@@ -176,6 +176,7 @@ end;{ TMatchesResultSet.Create }
 
 destructor TMatchesResultSet.Destroy;
 begin
+    System.Finalize( fMatch );
     System.Finalize( fRegEx );
     inherited Destroy;
 end;{ TMatchesResultSet.Destroy }
