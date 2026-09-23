@@ -50,11 +50,22 @@ function find_first(
 
 function replace(
     text        blob sub_type text character set UTF8
-  , pattern     blob sub_type text character set UTF8
-  , replacement blob sub_type text character set UTF8
+  , pattern     varchar(8191)      character set UTF8
+  , replacement varchar(8191)      character set UTF8
   , amount      integer
   , pass        integer
 )returns        blob sub_type text character set UTF8;
+
+procedure substitute(
+    text        blob sub_type text character set UTF8
+  , pattern     varchar(8191)      character set UTF8
+  , replacement varchar(8191)      character set UTF8
+  , amount      integer
+  , pass        integer
+)returns(
+    modified    blob sub_type text character set UTF8
+  , replaced    integer
+);
 
 procedure split_words(
     text   blob sub_type text character set UTF8
@@ -128,13 +139,28 @@ engine
 
 function replace(
     text        blob sub_type text character set UTF8
-  , pattern     blob sub_type text character set UTF8
-  , replacement blob sub_type text character set UTF8
+  , pattern     varchar(8191)      character set UTF8
+  , replacement varchar(8191)      character set UTF8
   , amount      integer
   , pass        integer
 )returns        blob sub_type text character set UTF8
 external name
     'fb_regex!replace'
+engine
+    udr
+;
+
+procedure substitute(
+    text        blob sub_type text character set UTF8
+  , pattern     varchar(8191)      character set UTF8
+  , replacement varchar(8191)      character set UTF8
+  , amount      integer
+  , pass        integer
+)returns(
+    modified    blob sub_type text character set UTF8
+  , replaced    integer
+)external name
+    'fb_regex!substitute'
 engine
     udr
 ;

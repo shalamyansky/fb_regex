@@ -61,6 +61,17 @@ function replace(
   , pass        integer
 )returns        varchar(8191) character set UTF8;
 
+procedure substitute(
+    text        varchar(8191) character set UTF8
+  , pattern     varchar(8191) character set UTF8
+  , replacement varchar(8191) character set UTF8
+  , amount      integer
+  , pass        integer
+)returns(
+    modified    varchar(8191) character set UTF8
+  , replaced    integer
+);
+
 procedure split(
     text      varchar(8191) character set UTF8
   , separator varchar(8191) character set UTF8
@@ -144,6 +155,21 @@ engine
     udr
 ;
 
+procedure substitute(
+    text        varchar(8191) character set UTF8
+  , pattern     varchar(8191) character set UTF8
+  , replacement varchar(8191) character set UTF8
+  , amount      integer
+  , pass        integer
+)returns(
+    modified    varchar(8191) character set UTF8
+  , replaced    integer
+)external name
+    'fb_regex!substitute'
+engine
+    udr
+;
+
 procedure split(
     text      varchar(8191) character set UTF8
   , separator varchar(8191) character set UTF8
@@ -201,13 +227,14 @@ var
 
 function firebird_udr_plugin( AStatus:IStatus; AUnloadFlagLocal:BooleanPtr; AUdrPlugin:IUdrPlugin ):BooleanPtr; cdecl;
 begin
-    AUdrPlugin.registerProcedure( AStatus, 'matches',     fbregex.TMatchesFactory.Create()    );
-    AUdrPlugin.registerProcedure( AStatus, 'groups',      fbregex.TGroupsFactory.Create()     );
-    AUdrPlugin.registerProcedure( AStatus, 'find',        fbfind.TFindFactory.Create()        );
-    AUdrPlugin.registerFunction(  AStatus, 'find_first',  fbfind.TFindFirstFactory.Create()   );
-    AUdrPlugin.registerFunction(  AStatus, 'replace',     fbreplace.TReplaceFactory.Create()  );
-    AUdrPlugin.registerProcedure( AStatus, 'split_words', fbsplit.TSplitWordsFactory.Create() );
-    AUdrPlugin.registerProcedure( AStatus, 'split',       fbsplit.TSplitFactory.Create()      );
+    AUdrPlugin.registerProcedure( AStatus, 'matches',     fbregex.TMatchesFactory.Create()               );
+    AUdrPlugin.registerProcedure( AStatus, 'groups',      fbregex.TGroupsFactory.Create()                );
+    AUdrPlugin.registerProcedure( AStatus, 'find',        fbfind.TFindFactory.Create()                   );
+    AUdrPlugin.registerFunction(  AStatus, 'find_first',  fbfind.TFindFirstFactory.Create()              );
+    AUdrPlugin.registerFunction(  AStatus, 'replace',     fbreplace.TReplaceFunctionFactory.Create()     );
+    AUdrPlugin.registerProcedure( AStatus, 'substitute',  fbreplace.TSubstituteProcedureFactory.Create() );
+    AUdrPlugin.registerProcedure( AStatus, 'split_words', fbsplit.TSplitWordsFactory.Create()            );
+    AUdrPlugin.registerProcedure( AStatus, 'split',       fbsplit.TSplitFactory.Create()                 );
 
     theirUnloadFlag := AUnloadFlagLocal;
     Result          := @myUnloadFlag;

@@ -143,7 +143,7 @@ Function ***replace*** seeks matches in ***text*** and replaces its with ***repl
         REPLACE
         ==========
         x = position( substring, text ); y = position( b, a );
-_
+-
 
     text : 'x = position (text,substring); y = position(a,b);'
 
@@ -176,6 +176,38 @@ _
         REPLACE
         ==========
         x = launch( value ); y = launch( default );
+
+## procedure *substitute*
+
+    procedure substitute(
+        text        string    -- text to update
+      , pattern     string    -- regular expression pattern to seek
+      , replacement string    -- value to replace with
+      , amount      integer   -- amount of matches to replace 
+      , pass        integer   -- amount to skip first matches
+    )returns(
+        modified    string    -- updated text
+      , replaced    integer   -- replaced matches count
+    )
+
+This selective procedure does the same as the ***replace*** function and also returns count of replaced matches in a single row result set.
+
+    text : 'x = run( value ); y = run();'
+
+    task : Change 'run' function to 'launch'. If function has no parameters set default one. Show replaced functions count.   
+
+    solution:
+        select
+              modified
+            , replaced
+          from
+            regex.substitute( :text, 'run\(\s*?(\S.*?)?\s*?\)', 'launch( ${1:+$1:default} )', null,  null )
+
+     result:    
+        MODIFIED                                    REPLACED
+        =========================================== ========
+        x = launch( value ); y = launch( default );        2
+
 
 ## procedure *split*
 

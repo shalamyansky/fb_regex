@@ -56,6 +56,17 @@ function replace(
   , pass        integer
 )returns        varchar(32765) character set WIN1251;
 
+procedure substitute(
+    text        varchar(32765) character set WIN1251
+  , pattern     varchar(32765) character set WIN1251
+  , replacement varchar(32765) character set WIN1251
+  , amount      integer
+  , pass        integer
+)returns(
+    modified    varchar(32765) character set WIN1251
+  , replaced    integer
+);
+
 procedure split_words(
     text   varchar(32765) character set WIN1251
 )returns(
@@ -135,6 +146,21 @@ function replace(
 )returns        varchar(32765) character set WIN1251
 external name
     'fb_regex!replace'
+engine
+    udr
+;
+
+procedure substitute(
+    text        varchar(32765) character set WIN1251
+  , pattern     varchar(32765) character set WIN1251
+  , replacement varchar(32765) character set WIN1251
+  , amount      integer
+  , pass        integer
+)returns(
+    modified    varchar(32765) character set WIN1251
+  , replaced    integer
+)external name
+    'fb_regex!substitute'
 engine
     udr
 ;

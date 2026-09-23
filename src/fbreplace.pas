@@ -42,12 +42,25 @@ uses
 
 type
 
-{ replace }
+{ TReplaceCounter }
 
-TReplaceFactory = class( TBwrFunctionFactory )
+TReplaceCounter = class
+  private
+    fCount       : LONGINT;
+    fReplacement : UnicodeString;
+  public
+    constructor Create( const Replacement:UnicodeString );
+    function Evaluate( const Match:TMatch ):UnicodeString;
+    property Count:LONGINT read fCount;
+end;{ TReplaceCounter }
+
+
+{ TReplaceFunction }
+
+TReplaceFunctionFactory = class( TBwrFunctionFactory )
   public
     function newItem( AStatus:IStatus; AContext:IExternalContext; AMetadata:IRoutineMetadata ):IExternalFunction; override;
-end;{ TReplaceFactory }
+end;{ TReplaceFunctionFactory }
 
 TReplaceFunction = class( TBwrFunction )
   const
@@ -61,8 +74,38 @@ TReplaceFunction = class( TBwrFunction )
     procedure execute( AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
 end;{ TReplaceFunction }
 
-function Replace(   Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
-function ReplaceEx( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
+
+{ TSubstituteProcedure }
+
+TSubstituteProcedureFactory = class( TBwrProcedureFactory )
+  public
+    function newItem( AStatus:IStatus; AContext:IExternalContext; AMetadata:IRoutineMetadata ):IExternalProcedure; override;
+end;{ TSubstituteProcedureFactory }
+
+TSubstituteProcedure = class( TBwrSelectiveProcedure )
+  const
+    INPUT_FIELD_TEXT        = 0;
+    INPUT_FIELD_PATTERN     = 1;
+    INPUT_FIELD_REPLACEMENT = 2;
+    INPUT_FIELD_AMOUNT      = 3;
+    INPUT_FIELD_SKIP        = 4;
+    OUTPUT_FIELD_RESULT     = 0;
+    OUTPUT_FIELD_COUNT      = 1;
+  protected
+    class function GetBwrResultSetClass:TBwrResultSetClass; override;
+end;{ TSubstituteProcedure }
+
+TSubstituteResultSet = class( TBwrResultSet )
+  private
+    fDone : BOOLEAN;
+  public
+    constructor Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER ); override;
+    function fetch( AStatus:IStatus ):BOOLEAN; override;
+end;{ TSubstituteResultSet }
+
+
+function Replace(   Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; out Replaced:LONGINT; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
+function ReplaceEx( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; out Replaced:LONGINT; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
 
 
 implementation
@@ -71,57 +114,34 @@ uses
     StrUtils
 ;
 
-{ TReplaceFactory }
-
-function TReplaceFactory.newItem( AStatus:IStatus; AContext:IExternalContext; AMetadata:IRoutineMetadata ):IExternalFunction;
+{ TReplaceCounter }
+{$REGION TReplaceCounter }
+constructor TReplaceCounter.Create( const Replacement:UnicodeString );
 begin
-    Result := TReplaceFunction.create( AMetadata );
-end;{ TReplaceFactory.newItem }
+    inherited Create;
+    fCount       := 0;
+    fReplacement := Replacement;
+end;{ TReplaceCounter.Create }
 
-
-{ TReplaceFunction }
-
-procedure TReplaceFunction.execute( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER );
-var
-    Text, Pattern, Replacement, Result : UnicodeString;
-    Amount, Skip : LONGINT;
-    TextNull, PatternNull, ReplacementNull, AmountNull, SkipNull, ResultNull : WORDBOOL;
-    TextOk,   PatternOk,   ReplacementOk,   AmountOk,   SkipOk,   ResultOk   : BOOLEAN;
+function TReplaceCounter.Evaluate( const Match:TMatch ):UnicodeString;
 begin
-    inherited execute( AStatus, AContext, aInMsg, aOutMsg );
-    System.Finalize( Result );
-    ResultNull := TRUE;
-    ResultOk   := FALSE;
+    Result := Match.Result( fReplacement );
+    Inc( fCount );
+end;{ TReplaceCounter.Evaluate }
+{$ENDREGION TReplaceCounter }
 
-    TextOk        := RoutineContext.ReadInputString(  AStatus, TReplaceFunction.INPUT_FIELD_TEXT,        Text,        TextNull        );
-    PatternOk     := RoutineContext.ReadInputString(  AStatus, TReplaceFunction.INPUT_FIELD_PATTERN,     Pattern,     PatternNull     );
-    ReplacementOk := RoutineContext.ReadInputString(  AStatus, TReplaceFunction.INPUT_FIELD_REPLACEMENT, Replacement, ReplacementNull );
-    AmountOk      := RoutineContext.ReadInputLongint( AStatus, TReplaceFunction.INPUT_FIELD_AMOUNT,      Amount,      AmountNull      );
-    SkipOk        := RoutineContext.ReadInputLongint( AStatus, TReplaceFunction.INPUT_FIELD_SKIP,        Skip,        SkipNull        );
-
-    if( AmountNull or ( Amount < 0 ) )then begin
-        Amount := $7FFFFFFF;
-    end;
-    if( SkipNull or ( Skip < 0 ) )then begin
-        Skip := 0;
-    end;
-
-    ResultNull := TextNull or PatternNull or ReplacementNull;
-    if( not ResultNull )then begin
-        Result := ReplaceEx( Text, Pattern, Replacement, Amount, Skip );
-    end;
-
-    ResultOk := RoutineContext.WriteOutputString( AStatus, TReplaceFunction.OUTPUT_FIELD_RESULT, Result, ResultNull );
-end;{ TReplaceFunction.execute }
-
-function Replace( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
+{ function_Replace }
+{$REGION function_Replace}
+function Replace( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; out Replaced:LONGINT; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
 var
-    RegEx : TRegEx;
-    Match : TMatch;
-    Start : LONGINT;
+    RegEx       : TRegEx;
+    Match       : TMatch;
+    Start       : LONGINT;
     Head , Tail : UnicodeString;
+    Counter     : TReplaceCounter;
 begin
-    Result := Text;
+    Result   := Text;
+    Replaced := 0;
     if( ( Length( Text ) = 0 ) or ( Length( Pattern ) = 0 ) )then begin
         exit;
     end;
@@ -131,31 +151,42 @@ begin
     if( Skip < 0 )then begin
         Skip := 0;
     end;
-    RegEx := TRegEx.Create( Pattern, [ roCompiled ] );
-    if( Skip = 0 )then begin
-        Result := RegEx.Replace( Text, Replacement, Amount );
-    end else begin
-        Match := RegEx.Match( Text );
-        Dec( Skip );
-        while( ( Skip > 0 ) and Match.Success )do begin
-            Match := Match.NextMatch;
+
+    try
+        Counter := nil;
+        Counter := TReplaceCounter.Create( Replacement );
+
+        RegEx := TRegEx.Create( Pattern, [ roCompiled ] );
+        if( Skip = 0 )then begin
+            Result := RegEx.Replace( Text, Counter.Evaluate, Amount );
+        end else begin
+            Match := RegEx.Match( Text );
             Dec( Skip );
+            while( ( Skip > 0 ) and Match.Success )do begin
+                Match := Match.NextMatch;
+                Dec( Skip );
+            end;
+            if( Match.Success )then begin
+                Start  := Match.Index + Match.Length;
+                Head   := Copy( Text, 1, Start - 1 );
+                Tail   := Copy( Text, Start );
+                Result := Head + RegEx.Replace( Tail, Counter.Evaluate, Amount );
+            end;
         end;
-        if( Match.Success )then begin
-            Start  := Match.Index + Match.Length;
-            Head   := Copy( Text, 1, Start - 1 );
-            Tail   := Copy( Text, Start );
-            Result := Head + RegEx.Replace( Tail, Replacement, Amount );
-        end;
+        Replaced := Counter.Count;
+    finally
+        Counter.Free;
+        Counter := nil;
     end;
     System.Finalize( Match );
     System.Finalize( RegEx );
 end;{ Replace }
+{$ENDREGION function_Replace}
 
-{ ReplaceEx }
+{ function_ReplaceEx }
+{$REGION function_ReplaceEx}
 
 { TCondition }
-
 type
 
 TCondition = class;
@@ -292,26 +323,28 @@ begin
     end;
 end;{ MakeMatchReplacement }
 
-function ReplaceEx( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
+function ReplaceEx( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; out Replaced:LONGINT; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
 var
-    RegEx, RegExRep : TRegEx;
-    Match           : TMatch;
-    Start, Pos      : LONGINT;
-    Conditions      : TConditions;
-    MatchReplacement, MatchReplaced : UnicodeString;
-    Builder         : TStringBuilder;
+    RegEx, RegExRep  : TRegEx;
+    Match            : TMatch;
+    Start, Pos       : LONGINT;
+    Conditions       : TConditions;
+    MatchReplacement : UnicodeString;
+    MatchReplaced    : UnicodeString;
+    Builder          : TStringBuilder;
 begin
-    Result := Text;
+    Result   := Text;
+    Replaced := 0;
     if( ( Length( Text ) = 0 ) or ( Length( Pattern ) = 0 ) )then begin
         exit;
     end;
     System.Finalize( Conditions );
-    Builder := nil;
+    Builder       := nil;
     try
         Conditions := PrepareConditions( Replacement );
         if( Length( Conditions ) = 0 )then begin
             //standard replacement without conditions
-            Result := Replace( Text, Pattern, Replacement, Amount, Skip );
+            Result := Replace( Text, Pattern, Replacement, Replaced, Amount, Skip );
         end else begin
             if( Amount < 0 )then begin
                 Amount := $7FFFFFFF;
@@ -334,6 +367,7 @@ begin
                         .Append( MatchReplaced )
                     ;
                     Dec( Amount );
+                    Inc( Replaced );
                 end else begin
                     Builder.Append( Text, Pos, Match.Index + Match.Length - 1 - Pos );
                     Dec( Skip );
@@ -353,6 +387,125 @@ begin
         FreeConditions( Conditions );
     end;
 end;{ ReplaceEx }
+
+{$ENDREGION function_ReplaceEx}
+
+{ TReplaceFunction }
+{$REGION TReplaceFunction}
+
+{ TReplaceFactory }
+
+function TReplaceFunctionFactory.newItem( AStatus:IStatus; AContext:IExternalContext; AMetadata:IRoutineMetadata ):IExternalFunction;
+begin
+    Result := TReplaceFunction.create( AMetadata );
+end;{ TReplaceFunctionFactory.newItem }
+
+{ TReplaceFunction }
+
+procedure TReplaceFunction.execute( AStatus:IStatus; AContext:IExternalContext; aInMsg:POINTER; aOutMsg:POINTER );
+var
+    Text, Pattern, Replacement, Result : UnicodeString;
+    Amount, Skip, Replaced : LONGINT;
+    TextNull, PatternNull, ReplacementNull, AmountNull, SkipNull, ResultNull : WORDBOOL;
+    TextOk,   PatternOk,   ReplacementOk,   AmountOk,   SkipOk,   ResultOk   : BOOLEAN;
+begin
+    inherited execute( AStatus, AContext, aInMsg, aOutMsg );
+    System.Finalize( Result );
+    ResultNull := TRUE;
+    ResultOk   := FALSE;
+
+    TextOk        := RoutineContext.ReadInputString(  AStatus, TReplaceFunction.INPUT_FIELD_TEXT,        Text,        TextNull        );
+    PatternOk     := RoutineContext.ReadInputString(  AStatus, TReplaceFunction.INPUT_FIELD_PATTERN,     Pattern,     PatternNull     );
+    ReplacementOk := RoutineContext.ReadInputString(  AStatus, TReplaceFunction.INPUT_FIELD_REPLACEMENT, Replacement, ReplacementNull );
+    AmountOk      := RoutineContext.ReadInputLongint( AStatus, TReplaceFunction.INPUT_FIELD_AMOUNT,      Amount,      AmountNull      );
+    SkipOk        := RoutineContext.ReadInputLongint( AStatus, TReplaceFunction.INPUT_FIELD_SKIP,        Skip,        SkipNull        );
+
+    if( AmountNull or ( Amount < 0 ) )then begin
+        Amount := $7FFFFFFF;
+    end;
+    if( SkipNull or ( Skip < 0 ) )then begin
+        Skip := 0;
+    end;
+
+    ResultNull := TextNull or PatternNull or ReplacementNull;
+    if( not ResultNull )then begin
+        Result := ReplaceEx( Text, Pattern, Replacement, Replaced, Amount, Skip );
+    end;
+
+    ResultOk := RoutineContext.WriteOutputString( AStatus, TReplaceFunction.OUTPUT_FIELD_RESULT, Result, ResultNull );
+end;{ TReplaceFunction.execute }
+
+{$ENDREGION TReplaceFunction}
+
+{ TSubstituteProcedure }
+{$REGION TSubstituteProcedure}
+
+{ TSubstituteFactory }
+
+function TSubstituteProcedureFactory.newItem( AStatus:IStatus; AContext:IExternalContext; AMetadata:IRoutineMetadata ):IExternalProcedure;
+begin
+    Result := TSubstituteProcedure.create( AMetadata );
+end;{ TSubstituteProcedureFactory.newItem }
+
+{ TSubstituteProcedure }
+
+class function TSubstituteProcedure.GetBwrResultSetClass:TBwrResultSetClass;
+begin
+    Result := TSubstituteResultSet;
+end;{ TSubstituteProcedure.GetBwrResultSetClass }
+
+{ TSubstituteResultSet }
+
+constructor TSubstituteResultSet.Create( ASelectiveProcedure:TBwrSelectiveProcedure; AStatus:IStatus; AContext:IExternalContext; AInMsg:POINTER; AOutMsg:POINTER );
+begin
+    inherited Create( ASelectiveProcedure, AStatus, AContext, AInMsg, AOutMsg );
+    fDone := FALSE;
+end;{ TSubstituteResultSet.Create }
+
+function TSubstituteResultSet.fetch( AStatus:IStatus ):BOOLEAN;
+var
+    Text, Pattern, Replacement, Modified : UnicodeString;
+    Amount, Skip, Count                  : LONGINT;
+    TextNull, PatternNull, ReplacementNull, AmountNull, SkipNull, ModifiedNull, CountNull : WORDBOOL;
+    TextOk,   PatternOk,   ReplacementOk,   AmountOk,   SkipOk,   ModifiedOk,   CountOk   : BOOLEAN;
+begin
+    Result := not fDone; //single row only
+    if( fDone )then begin
+        exit;
+    end;
+    ModifiedNull := TRUE;
+    CountNull    := TRUE;
+    System.Finalize( Modified );
+    Count        := 0;
+
+    TextOk        := RoutineContext.ReadInputString(  AStatus, TSubstituteProcedure.INPUT_FIELD_TEXT,        Text,        TextNull        );
+    PatternOk     := RoutineContext.ReadInputString(  AStatus, TSubstituteProcedure.INPUT_FIELD_PATTERN,     Pattern,     PatternNull     );
+    ReplacementOk := RoutineContext.ReadInputString(  AStatus, TSubstituteProcedure.INPUT_FIELD_REPLACEMENT, Replacement, ReplacementNull );
+    AmountOk      := RoutineContext.ReadInputLongint( AStatus, TSubstituteProcedure.INPUT_FIELD_AMOUNT,      Amount,      AmountNull      );
+    SkipOk        := RoutineContext.ReadInputLongint( AStatus, TSubstituteProcedure.INPUT_FIELD_SKIP,        Skip,        SkipNull        );
+    if( AmountNull or ( Amount < 0 ) )then begin
+        Amount := $7FFFFFFF;
+    end;
+    if( SkipNull or ( Skip < 0 ) )then begin
+        Skip := 0;
+    end;
+
+    if( ( not TextNull ) and ( not PatternNull ) and ( not ReplacementNull ) )then begin
+
+        Modified     := ReplaceEx( Text, Pattern, Replacement, Count, Amount, Skip );
+
+        ModifiedNull := FALSE;
+        CountNull    := FALSE;
+
+    end;
+
+    ModifiedOk := RoutineContext.WriteOutputString(  AStatus, TSubstituteProcedure.OUTPUT_FIELD_RESULT, Modified, ModifiedNull );
+    CountOk    := RoutineContext.WriteOutputLongint( AStatus, TSubstituteProcedure.OUTPUT_FIELD_COUNT,  Count,    CountNull    );
+
+    fDone := TRUE;
+end;{ TSubstituteResultSet.fetch }
+
+{$ENDREGION TSubstituteProcedure}
 
 
 end.
