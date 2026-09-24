@@ -25,6 +25,21 @@ engine
     udr
 ^
 
+create or alter procedure substitute(
+    text        varchar(8191) character set UTF8
+  , pattern     varchar(8191) character set UTF8
+  , replacement varchar(8191) character set UTF8
+  , amount      integer
+  , pass        integer
+)returns(
+    modified    varchar(8191) character set UTF8
+  , replaced    integer
+)external name
+    'fb_regex!replace'
+engine
+    udr
+^
+
 set term ;^
 *)
 
@@ -42,16 +57,41 @@ uses
 
 type
 
+{ TCondition }
+
+TCondition = class;
+TConditions = array of TCondition;
+TCondition = class
+  private
+    Start    : LONGINT;
+    Length   : LONGINT;
+    GroupNo  : LONGINT;
+    Present  : UnicodeString;
+    PreConds : TConditions;
+    Absent   : UnicodeString;
+    AbsConds : TConditions;
+  public
+    constructor Create; overload;
+    constructor Create( Start, Length, GroupNo : LONGINT ); overload;
+    destructor  Destroy; override;
+end;{ TCondition }
+
 { TReplaceCounter }
 
 TReplaceCounter = class
   private
+    fSkip        : LONGINT;
+    fAmount      : LONGINT;
     fCount       : LONGINT;
     fReplacement : UnicodeString;
+    fConditions  : TConditions;
   public
-    constructor Create( const Replacement:UnicodeString );
+    constructor Create( const Replacement:UnicodeString; Amount:LONGINT; Skip:LONGINT );
+    destructor Destroy; override;
     function Evaluate( const Match:TMatch ):UnicodeString;
-    property Count:LONGINT read fCount;
+    property Amount:LONGINT read fAmount write fAmount;
+    property Skip:LONGINT   read fSkip   write fSkip;
+    property Count:LONGINT  read fCount;
 end;{ TReplaceCounter }
 
 
@@ -104,8 +144,7 @@ TSubstituteResultSet = class( TBwrResultSet )
 end;{ TSubstituteResultSet }
 
 
-function Replace(   Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; out Replaced:LONGINT; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
-function ReplaceEx( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; out Replaced:LONGINT; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
+function Replace(  Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; out Replaced:LONGINT; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
 
 
 implementation
@@ -114,98 +153,8 @@ uses
     StrUtils
 ;
 
-{ TReplaceCounter }
-{$REGION TReplaceCounter }
-constructor TReplaceCounter.Create( const Replacement:UnicodeString );
-begin
-    inherited Create;
-    fCount       := 0;
-    fReplacement := Replacement;
-end;{ TReplaceCounter.Create }
-
-function TReplaceCounter.Evaluate( const Match:TMatch ):UnicodeString;
-begin
-    Result := Match.Result( fReplacement );
-    Inc( fCount );
-end;{ TReplaceCounter.Evaluate }
-{$ENDREGION TReplaceCounter }
-
-{ function_Replace }
-{$REGION function_Replace}
-function Replace( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; out Replaced:LONGINT; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
-var
-    RegEx       : TRegEx;
-    Match       : TMatch;
-    Start       : LONGINT;
-    Head , Tail : UnicodeString;
-    Counter     : TReplaceCounter;
-begin
-    Result   := Text;
-    Replaced := 0;
-    if( ( Length( Text ) = 0 ) or ( Length( Pattern ) = 0 ) )then begin
-        exit;
-    end;
-    if( Amount < 0 )then begin
-        Amount := $7FFFFFFF;
-    end;
-    if( Skip < 0 )then begin
-        Skip := 0;
-    end;
-
-    try
-        Counter := nil;
-        Counter := TReplaceCounter.Create( Replacement );
-
-        RegEx := TRegEx.Create( Pattern, [ roCompiled ] );
-        if( Skip = 0 )then begin
-            Result := RegEx.Replace( Text, Counter.Evaluate, Amount );
-        end else begin
-            Match := RegEx.Match( Text );
-            Dec( Skip );
-            while( ( Skip > 0 ) and Match.Success )do begin
-                Match := Match.NextMatch;
-                Dec( Skip );
-            end;
-            if( Match.Success )then begin
-                Start  := Match.Index + Match.Length;
-                Head   := Copy( Text, 1, Start - 1 );
-                Tail   := Copy( Text, Start );
-                Result := Head + RegEx.Replace( Tail, Counter.Evaluate, Amount );
-            end;
-        end;
-        Replaced := Counter.Count;
-    finally
-        Counter.Free;
-        Counter := nil;
-    end;
-    System.Finalize( Match );
-    System.Finalize( RegEx );
-end;{ Replace }
-{$ENDREGION function_Replace}
-
-{ function_ReplaceEx }
-{$REGION function_ReplaceEx}
-
-{ TCondition }
-type
-
-TCondition = class;
-TConditions = array of TCondition;
-TCondition = class
-  private
-    Start    : LONGINT;
-    Length   : LONGINT;
-    GroupNo  : LONGINT;
-    Present  : UnicodeString;
-    PreConds : TConditions;
-    Absent   : UnicodeString;
-    AbsConds : TConditions;
-  public
-    constructor Create; overload;
-    constructor Create( Start, Length, GroupNo : LONGINT ); overload;
-    destructor  Destroy; override;
-end;{ TCondition }
-
+{ REGION TCondition}
+{$REGION TCondition}
 constructor TCondition.Create;
 begin
     inherited Create;
@@ -297,6 +246,7 @@ begin
     end;
     System.Finalize( cndRegEx );
 end;{ PrepareConditions }
+{$ENDREGION TCondition}
 
 function MakeMatchReplacement( Match:TMatch; Replacement:UnicodeString; Conditions:TConditions ):UnicodeString;
 var
@@ -323,74 +273,78 @@ begin
     end;
 end;{ MakeMatchReplacement }
 
-function ReplaceEx( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; out Replaced:LONGINT; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
+{ REGION TReplaceCounter }
+{$REGION TReplaceCounter }
+constructor TReplaceCounter.Create( const Replacement:UnicodeString; Amount:LONGINT; Skip:LONGINT );
+begin
+    inherited Create;
+    fReplacement := Replacement;
+    fAmount      := Amount;
+    if( fAmount < 0 )then begin
+        fAmount  := $7FFFFFFF;
+    end;
+    fSkip        := Skip;
+    if( fSkip < 0 )then begin
+        fSkip    := 0;
+    end;
+    fConditions := PrepareConditions( Replacement );
+    fCount      := 0;
+end;{ TReplaceCounter.Create }
+
+function TReplaceCounter.Evaluate( const Match:TMatch ):UnicodeString;
 var
-    RegEx, RegExRep  : TRegEx;
-    Match            : TMatch;
-    Start, Pos       : LONGINT;
-    Conditions       : TConditions;
-    MatchReplacement : UnicodeString;
-    MatchReplaced    : UnicodeString;
-    Builder          : TStringBuilder;
+    LocalReplacement : UnicodeString;
+begin
+    System.Finalize( Result );
+    if( fSkip > 0 )then begin
+        Dec( fSkip );
+        Result := Match.Value;
+    end else if( fCount >= fAmount )then begin
+        Result := Match.Value;
+    end else begin
+        if( Length( fConditions ) = 0 )then begin
+            LocalReplacement := fReplacement;
+        end else begin
+            LocalReplacement := MakeMatchReplacement( Match, fReplacement, fConditions );
+        end;
+        Result := Match.Result( LocalReplacement );
+        Inc( fCount );
+    end;
+end;{ TReplaceCounter.Evaluate }
+
+destructor TReplaceCounter.Destroy;
+begin
+    FreeConditions( fConditions );
+    inherited Destroy;
+end;{ TReplaceCounter.Destroy }
+
+{$ENDREGION TReplaceCounter }
+
+function Replace( Text:UnicodeString; Pattern:UnicodeString; Replacement:UnicodeString; out Replaced:LONGINT; Amount:LONGINT = $7FFFFFFF; Skip:LONGINT = 0 ):UnicodeString; overload;
+var
+    RegEx   : TRegEx;
+    Counter : TReplaceCounter;
 begin
     Result   := Text;
     Replaced := 0;
     if( ( Length( Text ) = 0 ) or ( Length( Pattern ) = 0 ) )then begin
         exit;
     end;
-    System.Finalize( Conditions );
-    Builder       := nil;
     try
-        Conditions := PrepareConditions( Replacement );
-        if( Length( Conditions ) = 0 )then begin
-            //standard replacement without conditions
-            Result := Replace( Text, Pattern, Replacement, Replaced, Amount, Skip );
-        end else begin
-            if( Amount < 0 )then begin
-                Amount := $7FFFFFFF;
-            end;
-            if( Skip < 0 )then begin
-                Skip := 0;
-            end;
-            RegEx    := TRegEx.Create( Pattern, [ roCompiled ] ); //to seek matches
-            RegExRep := TRegEx.Create( Pattern, [ roCompiled ] ); //to replace each match with its replacement
-            Builder  := TStringBuilder.Create( 16384 );
-            Pos      := 0;
-            Match    := RegEx.Match( Text );
-            while( ( Amount > 0 ) and Match.Success )do begin
-                if( Skip = 0 )then begin
-                    MatchReplacement := MakeMatchReplacement( Match, Replacement, Conditions );
-                    MatchReplaced    := RegExRep.Replace( Match.Value, MatchReplacement );
-                    //StringBuilder.Append( , Pos ) suddenly adds low(string)=1 to Pos (?!)
-                    Builder
-                        .Append( Text, Pos, Match.Index - 1 - Pos )
-                        .Append( MatchReplaced )
-                    ;
-                    Dec( Amount );
-                    Inc( Replaced );
-                end else begin
-                    Builder.Append( Text, Pos, Match.Index + Match.Length - 1 - Pos );
-                    Dec( Skip );
-                end;
-                Pos   := Match.Index + Match.Length - 1;
-                Match := Match.NextMatch;
-            end;
-            Builder.Append( Text, Pos );
-            Result := Builder.ToString;
+        Counter  := nil;
+        Counter  := TReplaceCounter.Create( Replacement, Amount, Skip );
+        RegEx    := TRegEx.Create( Pattern, [ roCompiled ] );
 
-            System.Finalize( Match );
-            System.Finalize( RegEx );
-            System.Finalize( RegExRep );
-        end;
+        Result   := RegEx.Replace( Text, Counter.Evaluate );
+        Replaced := Counter.Count;
     finally
-        FreeAndNil( Builder );
-        FreeConditions( Conditions );
+        System.Finalize( RegEx );
+        FreeAndNil( Counter );
     end;
-end;{ ReplaceEx }
+end;{ Replace }
 
-{$ENDREGION function_ReplaceEx}
 
-{ TReplaceFunction }
+{ REGION TReplaceFunction }
 {$REGION TReplaceFunction}
 
 { TReplaceFactory }
@@ -427,9 +381,9 @@ begin
         Skip := 0;
     end;
 
-    ResultNull := TextNull or PatternNull or ReplacementNull;
+    ResultNull := TextNull or PatternNull;
     if( not ResultNull )then begin
-        Result := ReplaceEx( Text, Pattern, Replacement, Replaced, Amount, Skip );
+        Result := Replace( Text, Pattern, Replacement, Replaced, Amount, Skip );
     end;
 
     ResultOk := RoutineContext.WriteOutputString( AStatus, TReplaceFunction.OUTPUT_FIELD_RESULT, Result, ResultNull );
@@ -437,7 +391,7 @@ end;{ TReplaceFunction.execute }
 
 {$ENDREGION TReplaceFunction}
 
-{ TSubstituteProcedure }
+{ REGION TSubstituteProcedure }
 {$REGION TSubstituteProcedure}
 
 { TSubstituteFactory }
@@ -490,9 +444,9 @@ begin
         Skip := 0;
     end;
 
-    if( ( not TextNull ) and ( not PatternNull ) and ( not ReplacementNull ) )then begin
+    if( ( not TextNull ) and ( not PatternNull ) )then begin
 
-        Modified     := ReplaceEx( Text, Pattern, Replacement, Count, Amount, Skip );
+        Modified     := Replace( Text, Pattern, Replacement, Count, Amount, Skip );
 
         ModifiedNull := FALSE;
         CountNull    := FALSE;
